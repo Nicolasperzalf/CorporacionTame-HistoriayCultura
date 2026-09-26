@@ -9,5 +9,5 @@
 //  (js/contenido-local.js) y el formulario funciona en modo demostración.
 // ─────────────────────────────────────────────────────────────
 
-export const SUPABASE_URL = "";      // ej: "https://abcdxyz.supabase.co"
-export const SUPABASE_ANON_KEY = ""; // ej: "eyJhbGciOiJI..."
+export const SUPABASE_URL = "https://uilwakreevwnffstzcot.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_RMDusCEmc9XygjQZalMRSQ_guvjh2Wd";
