@@ -82,25 +82,7 @@ create table if not exists public.publicaciones (          -- VI · Publicacione
   creado timestamptz not null default now()
 );
 
-create table if not exists public.himno (                  -- V · Himno (una fila por estrofa)
-  id uuid primary key default gen_random_uuid(),
-  orden int not null default 0,
-  titulo text not null,
-  letra text not null,                                      -- un verso por línea
-  publicado boolean not null default true
-);
-
-create table if not exists public.bandera (                -- V · Franjas de la bandera
-  id uuid primary key default gen_random_uuid(),
-  orden int not null default 0,
-  nombre text not null,
-  color text not null,
-  color_texto text not null default '#ffffff',
-  significado text,
-  publicado boolean not null default true
-);
-
--- ── Aportes ciudadanos (formulario del capítulo VII) ───────
+-- ── Aportes ciudadanos (formulario del capítulo VI) ───────
 create table if not exists public.aportes (
   id uuid primary key default gen_random_uuid(),
   creado timestamptz not null default now(),
@@ -117,7 +99,7 @@ create table if not exists public.aportes (
 do $$
 declare t text;
 begin
-  foreach t in array array['columnas','monumentos','hitos','publicaciones','himno','bandera'] loop
+  foreach t in array array['columnas','monumentos','hitos','publicaciones'] loop
     execute format('alter table public.%I enable row level security', t);
     execute format('drop policy if exists "lectura publica" on public.%I', t);
     execute format('create policy "lectura publica" on public.%I for select using (publicado or public.es_admin())', t);

@@ -42,9 +42,8 @@ const PAGES = [
   { id: "tribuna", n: "II", label: "Tribuna de la Memoria", kicker: "Opinión", blurb: "Columnas de opinión sobre el Llano y su historia." },
   { id: "monumentos", n: "III", label: "Salón de monumentos", kicker: () => C.monumentos.length + " piezas", blurb: "Recorre uno a uno los monumentos de Tame." },
   { id: "historia", n: "IV", label: "Línea temporal", kicker: () => C.hitos.length ? parseInt(C.hitos[0].anio, 10) + "–" + parseInt(C.hitos[C.hitos.length - 1].anio, 10) : "Historia", blurb: "Los hitos de Tame, de la misión a la libertad." },
-  { id: "simbolos", n: "V", label: "Símbolos", kicker: "Identidad", blurb: "La bandera y el himno de Tame." },
-  { id: "publicaciones", n: "VI", label: "Publicaciones", kicker: "Biblioteca", blurb: "Libros que leen el territorio." },
-  { id: "aportar", n: "VII", label: "Aporte ciudadano", kicker: "Participa", blurb: "Suma tu recuerdo al archivo." }
+  { id: "publicaciones", n: "V", label: "Publicaciones", kicker: "Biblioteca", blurb: "Libros que leen el territorio." },
+  { id: "aportar", n: "VI", label: "Aporte ciudadano", kicker: "Participa", blurb: "Suma tu recuerdo al archivo." }
 ];
 const kicker = p => typeof p.kicker === "function" ? p.kicker() : p.kicker;
 const vacio = (cap, titulo) => `<section class="seccion"><p class="antetitulo">${cap}</p><h1 class="titulo">${titulo}</h1><p class="lead" style="margin-top:24px">Pronto publicaremos contenido en esta sección.</p></section>`;
@@ -68,7 +67,7 @@ V.inicio = () => {
   </section>
   <section class="seccion capitulos" id="capitulos" data-screen-label="Capítulos">
     <div class="cabecera" data-rv>
-      <div><p class="antetitulo">Destinos del viaje</p><h2 class="titulo-2">Siete puertas <em>al tiempo.</em></h2></div>
+      <div><p class="antetitulo">Destinos del viaje</p><h2 class="titulo-2">Seis puertas <em>al tiempo.</em></h2></div>
       <p class="lead">Cada capítulo es una estación del archivo. Entra por la que prefieras; el viaje continúa en la siguiente.</p>
     </div>
     <div class="rejilla-destinos">${PAGES.slice(1).map((p, i) => `
@@ -280,88 +279,17 @@ M.historia = () => {
   alSalir(() => removeEventListener("keydown", tecla));
 };
 
-// ── V · Símbolos ──
-let audio = null;
-const estrofas = () => C.himno.map(h => { const l = lineas(h.letra).map(x => x.split(/\s+/)); return { titulo: h.titulo, lineas: l, total: l.flat().length, texto: lineas(h.letra).join(" ") }; });
-V.simbolos = () => `
-  <section class="seccion" data-screen-label="V · Símbolos">
-    <div class="cabecera" data-rv>
-      <div><p class="antetitulo">Capítulo V · Identidad municipal</p><h1 class="titulo">Verde, blanco <em>y rojo.</em></h1></div>
-      <p class="credito">${esc(A.bandera_credito)}</p>
-    </div>
-    <div class="bandera" data-rv>${C.bandera.map((b, i) => `
-      <div class="franja" style="background:${esc(b.color)};color:${esc(b.color_texto)};--d:${(i * 1.2).toFixed(1)}s"><b>${esc(b.nombre)}</b><span>${esc(b.significado)}</span></div>`).join("")}
-    </div>
-    ${C.himno.length ? `
-    <div class="himno" data-rv>
-      <div class="himno-panel vidrio">
-        <div><p class="etiqueta">Himno de Tame</p><p class="creditos">${esc(A.himno_creditos)}</p></div>
-        <div class="estrofas" role="tablist" aria-label="Estrofas">${estrofas().map((e, i) => `
-          <button type="button" role="tab" class="estrofa" data-hy="${i}"><i></i><span>${esc(e.titulo)}</span><small></small></button>`).join("")}
-        </div>
-        <div class="fila-btns"><button type="button" class="btn-oro" id="hy-play"></button><button type="button" class="btn-linea" id="hy-todo">Leer completa</button></div>
-      </div>
-      <div class="himno-lectura vidrio"><p id="hy-tit"></p><div class="versos" id="hy-versos"></div></div>
-    </div>` : ""}
-  </section>`;
-M.simbolos = () => {
-  const E = estrofas(); if (!E.length) return;
-  let hy = 0, lit = 0, play = false, espera = 0;
-  const versos = $("#hy-versos"), btn = $("#hy-play");
-  const marcar = () => {
-    const e = E[hy];
-    $$("span", versos).forEach((s, i) => { s.className = i === lit - 1 && lit < e.total ? "actual" : i < lit ? "leida" : ""; });
-    $$(".estrofa").forEach((b, i) => {
-      b.setAttribute("aria-selected", i === hy);
-      $("i", b).style.width = i < hy ? "100%" : i === hy ? (lit / E[i].total * 100).toFixed(1) + "%" : "0%";
-      $("small", b).textContent = i === hy && play ? "recitando" : "";
-    });
-    btn.textContent = play ? "❚❚ Pausar" : lit >= e.total && hy === E.length - 1 ? "↻ Recitar de nuevo" : "▶ Recitar";
-  };
-  const pintar = () => {
-    const e = E[hy];
-    $("#hy-tit").textContent = e.titulo;
-    versos.setAttribute("aria-label", e.texto);
-    versos.innerHTML = e.lineas.map(l => `<p aria-hidden="true">${l.map(w => `<span>${esc(w)}</span>`).join("")}</p>`).join("");
-    marcar();
-  };
-  const elegir = i => {
-    versos.style.opacity = 0; versos.style.transform = "translateY(20px)";
-    setTimeout(() => { hy = i; lit = 0; espera = 0; pintar(); versos.style.opacity = 1; versos.style.transform = "none"; }, 450);
-  };
-  const tick = setInterval(() => {
-    if (!play) return;
-    if (lit < E[hy].total) { lit++; marcar(); return; }
-    if (++espera < 6) return;
-    espera = 0;
-    if (hy < E.length - 1) elegir(hy + 1); else { play = false; marcar(); }
-  }, 420);
-  const sonido = () => { if (!audio && A.himno_audio) { audio = new Audio(A.himno_audio); audio.preload = "auto"; } return audio; };
-  btn.onclick = () => {
-    const au = sonido();
-    if (play) { play = false; au && au.pause(); marcar(); return; }
-    if (lit >= E[hy].total && hy === E.length - 1) { elegir(0); if (au) au.currentTime = 0; }
-    au && au.play().catch(() => {});
-    play = true; marcar();
-  };
-  $("#hy-todo").onclick = () => { play = false; lit = E[hy].total; audio && audio.pause(); marcar(); };
-  $$(".estrofa").forEach(b => b.onclick = () => elegir(+b.dataset.hy));
-  pintar();
-  const arranque = setTimeout(() => { if (!S.reduce) { play = true; marcar(); } }, 1400);
-  alSalir(() => { clearInterval(tick); clearTimeout(arranque); if (audio) { audio.pause(); audio.currentTime = 0; } });
-};
-
-// ── VI · Publicaciones ──
+// ── V · Publicaciones ──
 let libI = 0;
 const proporciones = {};
 V.publicaciones = () => {
   const P = C.publicaciones;
-  if (!P.length) return vacio("Capítulo VI · Publicaciones", "El territorio también se lee.");
+  if (!P.length) return vacio("Capítulo V · Publicaciones", "El territorio también se lee.");
   libI = Math.min(libI, P.length - 1);
   return `
-  <section class="seccion" data-screen-label="VI · Publicaciones">
+  <section class="seccion" data-screen-label="V · Publicaciones">
     <div class="cabecera" data-rv>
-      <div><p class="antetitulo">Capítulo VI · Publicaciones</p><h1 class="titulo">El territorio <em style="color:var(--perla)">también se lee.</em></h1></div>
+      <div><p class="antetitulo">Capítulo V · Publicaciones</p><h1 class="titulo">El territorio <em style="color:var(--perla)">también se lee.</em></h1></div>
       <div class="pestanas" role="tablist" aria-label="Libros">${P.map((b, i) => `<button type="button" role="tab" class="pestana" data-lib="${i}">${esc(b.volumen)} · ${esc(b.titulo)}</button>`).join("")}</div>
     </div>
     <div class="libro-caja vidrio" data-rv data-rv-delay="100">
@@ -443,10 +371,10 @@ M.publicaciones = () => {
   alSalir(() => cancelAnimationFrame(raf));
 };
 
-// ── VII · Aporte ciudadano ──
+// ── VI · Aporte ciudadano ──
 V.aportar = () => `
-  <section class="seccion aportar" data-screen-label="VII · Aporte ciudadano">
-    <p class="antetitulo" data-rv>Capítulo VII · Viaje en el tiempo</p>
+  <section class="seccion aportar" data-screen-label="VI · Aporte ciudadano">
+    <p class="antetitulo" data-rv>Capítulo VI · Viaje en el tiempo</p>
     <h1 class="titulo" data-rv>Tu recuerdo<br><em>es historia.</em></h1>
     <div class="aporte-fila">
       <div class="aporte-info vidrio" data-rv>

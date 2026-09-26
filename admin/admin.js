@@ -68,32 +68,11 @@ const TABLAS = {
       { k: "color_lomo", l: "Color del lomo", t: "color", def: "#d9d8d1" }, { k: "color_tinta_lomo", l: "Color del texto del lomo", t: "color", def: "#1f2924" },
       { k: "publicado", l: "Visible en el sitio", t: "si-no", def: true }
     ]
-  },
-  himno: {
-    nombre: "Himno de Tame", unidad: "estrofa", orden: ["orden", true],
-    ayuda: "Una ficha por estrofa. El sitio lo lee palabra por palabra.",
-    fila: r => [r.titulo, String(r.letra || "").split("\n")[0], null],
-    campos: [
-      { k: "titulo", l: "Título", t: "texto", req: 1, ayuda: "Ej.: Coro, Estrofa I" }, { k: "orden", l: "Orden", t: "numero", def: 0 },
-      { k: "letra", l: "Letra", t: "area", req: 1, ancho: 1, ayuda: "Un verso por línea." },
-      { k: "publicado", l: "Visible en el sitio", t: "si-no", def: true }
-    ]
-  },
-  bandera: {
-    nombre: "Bandera", unidad: "franja", orden: ["orden", true],
-    ayuda: "Franjas de la bandera, de arriba hacia abajo.",
-    fila: r => [r.nombre, r.significado, null],
-    campos: [
-      { k: "nombre", l: "Nombre", t: "texto", req: 1 }, { k: "orden", l: "Orden", t: "numero", def: 0 },
-      { k: "color", l: "Color de la franja", t: "color", def: "#2f7a45" }, { k: "color_texto", l: "Color del texto", t: "color", def: "#ffffff" },
-      { k: "significado", l: "Significado", t: "area", ancho: 1 },
-      { k: "publicado", l: "Visible en el sitio", t: "si-no", def: true }
-    ]
   }
 };
 const MENU = [
   { grupo: "Participación" }, { id: "aportes", l: "Aportes ciudadanos" },
-  { grupo: "Contenido" }, { id: "columnas" }, { id: "monumentos" }, { id: "hitos" }, { id: "publicaciones" }, { id: "himno" }, { id: "bandera" },
+  { grupo: "Contenido" }, { id: "columnas" }, { id: "monumentos" }, { id: "hitos" }, { id: "publicaciones" },
   { grupo: "General" }, { id: "ajustes", l: "Textos y contacto" }
 ];
 
@@ -241,7 +220,7 @@ function editor(tabla, reg) {
 async function aportes() {
   const c = $("#contenido");
   const F = [["pendiente", "Pendientes"], ["aprobado", "Aprobados"], ["rechazado", "Rechazados"], ["todos", "Todos"]];
-  c.innerHTML = `<div class="barra"><div><h1>Aportes ciudadanos</h1><p>Lo que la comunidad envía desde el capítulo VII. Revisa cada aporte, abre el archivo adjunto y márcalo como aprobado (catalogado en el archivo) o rechazado.</p></div></div>
+  c.innerHTML = `<div class="barra"><div><h1>Aportes ciudadanos</h1><p>Lo que la comunidad envía desde el capítulo VI. Revisa cada aporte, abre el archivo adjunto y márcalo como aprobado (catalogado en el archivo) o rechazado.</p></div></div>
     <div class="filtros">${F.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === filtroAportes}">${l}</button>`).join("")}</div>
     <div class="lista" id="aportes"><p class="suave">Cargando…</p></div>`;
   $$("[data-f]").forEach(b => b.onclick = () => { filtroAportes = b.dataset.f; aportes(); });
@@ -291,13 +270,13 @@ async function ajustes() {
   c.innerHTML = `<div class="barra"><div><h1>Textos y contacto</h1><p>Textos que aparecen en varias partes del sitio y los datos del pie de página.</p></div></div><p class="suave">Cargando…</p>`;
   const { data, error } = await sb.from("ajustes").select("*").order("clave");
   if (error) { c.innerHTML += `<p class="msg error">${esc(error.message)}</p>`; return; }
-  const largos = ["hero_texto", "nosotros_intro", "mision", "vision", "valores", "objetivos", "bandera_credito", "himno_creditos", "aporte_texto"];
+  const largos = ["hero_texto", "nosotros_intro", "mision", "vision", "valores", "objetivos", "aporte_texto"];
   const ordenados = [...data].sort((a, b) => (a.descripcion || a.clave).localeCompare(b.descripcion || b.clave, "es"));
   c.innerHTML = `<div class="barra"><div><h1>Textos y contacto</h1><p>Textos que aparecen en varias partes del sitio y los datos del pie de página.</p></div></div>
     <form class="tarjeta editor" id="f-ajustes">${ordenados.map(a => largos.includes(a.clave)
       ? `<label class="ancho">${esc(a.descripcion || a.clave)}<textarea data-clave="${esc(a.clave)}">${esc(a.valor)}</textarea></label>`
       : `<label>${esc(a.descripcion || a.clave)}<input type="text" data-clave="${esc(a.clave)}" value="${esc(a.valor)}"></label>`).join("")}
-      <div class="pie-editor"><span class="ayuda">Audio del himno: sube el MP3 a assets/audio/himno-tame.mp3 en GitHub o pega aquí un enlace.</span><div><button type="submit" class="btn primario">Guardar cambios</button></div></div>
+      <div class="pie-editor"><span></span><div><button type="submit" class="btn primario">Guardar cambios</button></div></div>
     </form>`;
   $("#f-ajustes").onsubmit = async e => {
     e.preventDefault();

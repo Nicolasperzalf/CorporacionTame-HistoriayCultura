@@ -1,7 +1,7 @@
 // Escena 3D de fondo: campo de estrellas "warp" + moneda dorada con el logotipo.
 // Lee el estado compartido S (página actual, ratón, velocidad de scroll, impulso de viaje).
 const THREE_URL = "https://unpkg.com/three@0.184.0/build/three.module.js";
-const LOGO = "assets/img/logo.jpeg";
+const LOGO = "assets/logo.jpeg";
 const easeOut = t => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
 
 // Posición del emblema en cada capítulo (xf/yf = fracción de pantalla, z = profundidad, s = escala)

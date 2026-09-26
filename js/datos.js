@@ -16,18 +16,16 @@ async function leer(tabla, orden) {
 export async function cargarContenido() {
   if (!conectado) return LOCAL;
   try {
-    const [aj, columnas, monumentos, hitos, publicaciones, himno, bandera] = await Promise.all([
+    const [aj, columnas, monumentos, hitos, publicaciones] = await Promise.all([
       fetch(`${BASE}/rest/v1/ajustes?select=clave,valor`, { headers: cab() }).then(r => { if (!r.ok) throw new Error("ajustes"); return r.json(); }),
       leer("columnas", "fecha.desc"),
       leer("monumentos", "orden.asc"),
       leer("hitos", "orden.asc"),
-      leer("publicaciones", "orden.asc"),
-      leer("himno", "orden.asc"),
-      leer("bandera", "orden.asc")
+      leer("publicaciones", "orden.asc")
     ]);
     const ajustes = { ...LOCAL.ajustes };
     aj.forEach(a => { if (a.valor !== null && a.valor !== "") ajustes[a.clave] = a.valor; });
-    return { ajustes, columnas, monumentos, hitos, publicaciones, himno, bandera };
+    return { ajustes, columnas, monumentos, hitos, publicaciones };
   } catch (e) {
     console.warn("No se pudo leer la base de datos; se usa el contenido de respaldo.", e);
     return LOCAL;

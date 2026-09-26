@@ -2,7 +2,7 @@
 // La fuente oficial es la base de datos (se edita desde /admin).
 // Los mismos datos están en supabase/02-datos-iniciales.sql.
 
-const I = "assets/img/";
+const I = "assets/";
 
 export const LOCAL = {
   ajustes: {
@@ -12,9 +12,6 @@ export const LOCAL = {
     vision: "Ser referente en la conservación de la memoria, la identidad y el patrimonio de Tame, con una ciudadanía que conoce, valora y comparte su historia.",
     valores: "Coherencia, responsabilidad, honestidad, rigor investigativo y transparencia en el manejo administrativo.",
     objetivos: "Desarrollar proyectos de investigación cultural.\nAsesorar a gobiernos en proyectos socioculturales.\nOrganizar conferencias y seminarios sobre el Llano.\nPromover la clasificación de archivos históricos.\nFundar una revista de investigación.\nEstimular una conciencia ciudadana sobre la historia regional.",
-    bandera_credito: "Bandera diseñada por Carmen Teresa Molina Ibarra. Pasa sobre cada franja para leer su significado.",
-    himno_creditos: "Letra: Elvira Sánchez de Granados. Música: Fernando Domínguez. Acuerdo 0008 del 7 de junio de 1989.",
-    himno_audio: "assets/audio/himno-tame.mp3",
     aporte_texto: "Una fotografía, una carta, un relato de los abuelos. Cada aporte se revisa y cataloga antes de entrar al archivo digital.",
     facebook: "https://facebook.com/turistame",
     instagram: "https://instagram.com/turistame",
@@ -61,19 +58,5 @@ export const LOCAL = {
   publicaciones: [
     { orden: 1, volumen: "Vol. I", titulo: "Tame, 400 años", subtitulo: "Demografía histórica, sociedad y familia", tipo: "Demografía histórica", texto_lomo: "TAME, 400 AÑOS", portada: I + "libro-tame400.jpeg", contraportada: I + "libro-tame400-back.jpeg", color_lomo: "#d9d8d1", color_tinta_lomo: "#1f7a45", grosor: 36, autores: "Luis Milciades Pérez González, Julio César Lamus Gélvez y Juan Jacobo Carrizales Casas.", descripcion: "Un estudio que reconstruye la población de Tame a partir de padrones, libros parroquiales y censos: cómo se formaron las familias, cómo cambiaron los oficios y qué huellas dejaron las migraciones en la sociedad llanera." },
     { orden: 2, volumen: "Vol. II", titulo: "De Macaguán a Corocito", subtitulo: "Historia jesuita en los Llanos de Tame, 1661–2026", tipo: "Historia misional", texto_lomo: "DE MACAGUÁN A COROCITO", portada: I + "libro-macaguan.jpeg", contraportada: I + "libro-macaguan-back.jpeg", color_lomo: "#4b1e2b", color_tinta_lomo: "#e8c66f", grosor: 28, autores: "Julio César Lamus Gélvez y Luis Milcíades Pérez González.", descripcion: "Recorre la presencia jesuita en los Llanos de Tame desde 1661: las reducciones, haciendas como Caribabare, la expulsión de 1767 y la memoria que esas misiones dejaron en los caminos entre Macaguán y Corocito." }
-  ],
-
-  himno: [
-    { orden: 1, titulo: "Coro", letra: "A las glorias de Tame cantemos,\ncorazones henchidos de amor;\nconsagrar un recuerdo anhelamos\na este pueblo de hazañas y honor." },
-    { orden: 2, titulo: "Estrofa I", letra: "Cuántas glorias ostenta mi pueblo,\nsu recuerdo no puedo olvidar;\nque sus hijos valientes sellaron\nlos principios de libertad." },
-    { orden: 3, titulo: "Estrofa II", letra: "Es tapiz de esmeralda su suelo,\nlo cruzaron valientes llaneros;\ny exponiendo sus vidas primero,\nlibertad en el puente nos dieron." },
-    { orden: 4, titulo: "Estrofa III", letra: "Con sus potros cual nuevos centauros\ny sus lanzas allá en el pantano,\nrompieron por siempre cosechando lauros\nlas viles cadenas que forjó el tirano." },
-    { orden: 5, titulo: "Estrofa IV", letra: "Abre Tame tus brazos queridos\ny recibe esta ofrenda sagrada,\ncon tus hijos que enlazan los hechos\nde una raza valiente y honrada." }
-  ],
-
-  bandera: [
-    { orden: 1, nombre: "Verde", color: "#2f7a45", color_texto: "#ffffff", significado: "La ilimitada llanura hacia el oriente y el sur: aquí termina el Sarare y comienza la Orinoquía." },
-    { orden: 2, nombre: "Blanco", color: "#F3EFE7", color_texto: "#0B0E14", significado: "La paz lograda por la lucha de sus moradores; también el nevado del Cocuy." },
-    { orden: 3, nombre: "Rojo", color: "#b3322b", color_texto: "#ffffff", significado: "La sangre de los patriotas que en el Pantano de Vargas y Boyacá libraron las batallas decisivas." }
   ]
 };
