@@ -331,7 +331,7 @@ M.publicaciones = () => {
       <p class="tipo">${esc(b.volumen)} · ${esc(b.tipo)}</p>
       <h2>${esc(b.titulo)}</h2>
       ${b.subtitulo ? `<p class="sub">${esc(b.subtitulo)}</p>` : ""}
-      <p class="desc">${esc(b.descripcion)}</p>
+      <div class="desc">${parrafos(b.descripcion).map(p => `<p>${esc(p)}</p>`).join("")}</div>
       ${b.autores ? `<p class="autores"><b>AUTORES · </b>${esc(b.autores)}</p>` : ""}
       <button type="button" class="btn-oro" data-ir="aportar">Solicitar ejemplar →</button>`;
     $$("[data-lib]").forEach(t => t.setAttribute("aria-selected", +t.dataset.lib === libI));

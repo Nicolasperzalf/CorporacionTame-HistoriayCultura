@@ -274,34 +274,7 @@ body.intro .aparece { opacity: 1; transform: none; }
 .tl-texto p { margin: 0 0 24px; font-size: 16px; line-height: 1.7; color: var(--texto-2); text-wrap: pretty; }
 .fila-btns { display: flex; flex-wrap: wrap; gap: 8px; }
 
-/* V · Símbolos */
-.credito { margin: 0; max-width: 380px; font-family: var(--f-titulo); font-style: italic; font-size: clamp(20px, 1.8vw, 24px); line-height: 1.4; color: var(--perla); text-wrap: pretty; }
-.bandera { display: flex; flex-direction: column; height: clamp(460px, 64vh, 620px); border-radius: 22px; overflow: hidden; box-shadow: 0 60px 120px -50px rgba(0, 0, 0, .9); }
-.franja { position: relative; flex: 1 1 0; min-height: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px; padding: 0 var(--pad-x); overflow: hidden; transition: flex-grow .7s var(--curva); }
-.franja:hover { flex-grow: 2.2; }
-.franja::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .18), rgba(255, 255, 255, 0)); animation: ondear 6s ease-in-out var(--d, 0s) infinite; pointer-events: none; }
-.franja b { position: relative; font-family: var(--f-titulo); font-weight: 400; font-size: clamp(40px, 5.4vw, 84px); line-height: 1; letter-spacing: -.02em; }
-.franja span { position: relative; max-width: 440px; font-size: clamp(15px, 1.3vw, 17px); line-height: 1.55; }
-.himno { margin-top: clamp(72px, 9vw, 128px); display: flex; flex-wrap: wrap; gap: 16px; }
-.himno-panel { flex: 1 1 260px; max-width: 340px; display: flex; flex-direction: column; gap: 20px; padding: clamp(24px, 3vw, 36px); background: rgba(11, 14, 20, .5); }
-.himno-panel .creditos { margin: 12px 0 0; font-size: 14px; line-height: 1.6; color: var(--gris); }
-.estrofas { display: grid; gap: 6px; }
-.estrofa { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--linea); background: transparent; color: var(--texto-2); font-size: 15px; overflow: hidden; text-align: left; transition: all .3s; }
-.estrofa:hover { border-color: rgba(197, 160, 89, .5); }
-.estrofa[aria-selected="true"] { border-color: rgba(197, 160, 89, .55); background: rgba(197, 160, 89, .12); color: var(--perla); }
-.estrofa span:first-of-type { font-family: var(--f-numeral); letter-spacing: .06em; }
-.estrofa small { font-size: 12px; color: var(--gris); }
-.estrofa i { position: absolute; left: 0; bottom: 0; height: 2px; width: 0; background: var(--oro); box-shadow: 0 0 8px var(--oro); transition: width .4s linear; }
-.himno-panel .fila-btns > * { flex: 1 1 auto; }
-.himno-lectura { flex: 999 1 520px; min-width: 0; min-height: clamp(380px, 48vh, 520px); display: flex; flex-direction: column; justify-content: center; gap: 24px; padding: clamp(28px, 4vw, 64px); background: radial-gradient(600px circle at 20% 0%, rgba(197, 160, 89, .12), transparent 60%), var(--vidrio); }
-.himno-lectura > p { margin: 0; font-family: var(--f-numeral); font-size: 14px; letter-spacing: .2em; text-transform: uppercase; color: var(--oro); }
-.versos { display: grid; gap: 6px; transition: opacity .5s ease, transform .8s var(--curva); }
-.versos p { margin: 0; display: flex; flex-wrap: wrap; gap: 0 .28em; font-family: var(--f-titulo); font-style: italic; font-size: clamp(26px, 3.2vw, 50px); line-height: 1.22; }
-.versos span { color: rgba(243, 239, 231, .2); transition: color .5s ease, text-shadow .6s ease; }
-.versos span.leida { color: var(--perla); }
-.versos span.actual { color: var(--oro-claro); text-shadow: 0 0 24px rgba(226, 196, 138, .7); }
-
-/* VI · Publicaciones */
+/* V · Publicaciones */
 .libro-caja { display: flex; flex-wrap: wrap; border-radius: 22px; overflow: hidden; }
 .libro-escena { flex: 1.3 1 460px; min-width: 0; position: relative; height: clamp(520px, 70vh, 720px); display: grid; place-items: center; overflow: hidden; cursor: grab; touch-action: pan-y; user-select: none; background: radial-gradient(ellipse at 50% 42%, rgba(197, 160, 89, .14) 0%, rgba(11, 14, 20, 0) 62%); }
 .libro-escena:active { cursor: grabbing; }
@@ -324,7 +297,8 @@ body.intro .aparece { opacity: 1; transform: none; }
 .libro-info .tipo { margin: 0 0 14px; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--oro); }
 .libro-info h2 { margin: 0 0 10px; font-family: var(--f-titulo); font-weight: 400; font-size: clamp(36px, 4vw, 58px); line-height: 1; letter-spacing: -.015em; }
 .libro-info .sub { margin: 0 0 22px; font-family: var(--f-titulo); font-style: italic; font-size: 21px; line-height: 1.3; color: var(--oro-claro); }
-.libro-info .desc { margin: 0 0 18px; font-size: 16px; line-height: 1.7; color: var(--texto-2); text-wrap: pretty; }
+.libro-info .desc { margin: 0 0 18px; max-height: clamp(220px, 34vh, 360px); overflow-y: auto; padding-right: 8px; scrollbar-width: thin; scrollbar-color: rgba(197,160,89,.5) transparent; }
+.libro-info .desc p { margin: 0 0 12px; font-size: 16px; line-height: 1.7; color: var(--texto-2); text-wrap: pretty; }
 .libro-info .autores { margin: 0 0 28px; padding-top: 16px; border-top: 1px solid var(--linea); font-size: 14px; line-height: 1.6; color: var(--gris); }
 .libro-info .autores b { font-size: 12px; font-weight: 400; letter-spacing: .14em; color: var(--oro); }
 .libro-info .btn-oro { align-self: flex-start; }
@@ -332,7 +306,7 @@ body.intro .aparece { opacity: 1; transform: none; }
 .pestana { min-height: 48px; padding: 0 20px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .18); background: rgba(11, 14, 20, .45); color: var(--perla); font-size: 15px; font-weight: 500; transition: all .3s; }
 .pestana[aria-selected="true"] { background: var(--oro); border-color: var(--oro); color: var(--noche); }
 
-/* VII · Aporte ciudadano */
+/* VI · Aporte ciudadano */
 .aportar h1 { margin-bottom: clamp(40px, 5vw, 72px); font-size: clamp(56px, 9vw, 160px); line-height: .88; letter-spacing: -.03em; }
 .aporte-fila { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
 .aporte-info { flex: 1 1 300px; max-width: 420px; padding: clamp(24px, 3vw, 36px); }
@@ -384,7 +358,6 @@ body.intro .aparece { opacity: 1; transform: none; }
 /* 7 · MOVIMIENTO ----------------------------------------------- */
 @keyframes pulso { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(2.8); opacity: 0; } }
 @keyframes brillo { from { background-position: 0 0; } to { background-position: -200% 0; } }
-@keyframes ondear { 0% { transform: translateX(-70%) skewX(-18deg); } 100% { transform: translateX(170%) skewX(-18deg); } }
 @keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
 [data-rv] { transition: opacity 1.2s ease, translate 1.6s var(--curva), scale 1.6s var(--curva), filter 1.2s ease; }
 [data-rv].oculto { opacity: 0; translate: 0 70px; scale: .95; filter: blur(10px); }
