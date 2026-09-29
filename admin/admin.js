@@ -116,7 +116,16 @@ async function entrar(sesion) {
   if (dentro) return; dentro = true;
   const { data: admin } = await sb.rpc("es_admin");
   if (!admin) { $("#contenido").innerHTML = `<div class="tarjeta vacio">Tu usuario (${esc(sesion.user.email)}) no está registrado como administrador.<br>Agrega tu correo a la tabla <code>administradores</code> en Supabase.</div>`; return; }
+  await quitarVolumenes();
   pintarMenu(); abrir(vista);
+}
+
+// Solo «Tame, 400 años» lleva volumen: al entrar se borran los «Vol. II–V» antiguos
+// (equivale a supabase/04-volumenes.sql; no toca volúmenes escritos después a mano).
+async function quitarVolumenes() {
+  await sb.from("publicaciones").update({ volumen: null })
+    .in("volumen", ["Vol. II", "Vol. III", "Vol. IV", "Vol. V"])
+    .neq("titulo", "Tame, 400 años");
 }
 
 // ── Menú lateral ──
