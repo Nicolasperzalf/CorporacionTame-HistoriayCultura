@@ -328,8 +328,9 @@ M.publicaciones = () => {
     $("#lib-sombra").style.width = px(W);
     aplicar();
     info.innerHTML = `
-      <p class="tipo">${esc(b.tipo)}${b.volumen ? " · " + esc(b.volumen) : ""}</p>
+      <p class="tipo">${esc(b.tipo)}</p>
       <h2>${esc(b.titulo)}</h2>
+      ${b.volumen ? `<p class="vol">${esc(b.volumen)}</p>` : ""}
       ${b.subtitulo ? `<p class="sub">${esc(b.subtitulo)}</p>` : ""}
       <p class="ctx">De la contraportada</p>
       <div class="desc${esVerso ? " verso" : ""}">${parrafos(b.descripcion).map(p => `<p>${esc(p)}</p>`).join("")}</div>
