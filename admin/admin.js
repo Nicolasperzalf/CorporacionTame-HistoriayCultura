@@ -56,7 +56,7 @@ const TABLAS = {
   publicaciones: {
     nombre: "Publicaciones", unidad: "libro", orden: ["orden", true],
     ayuda: "Libros que se muestran en 3D. Sube portada, contraportada y (opcional) la foto del lomo en vertical. La descripción es el texto de la contraportada.",
-    fila: r => [`${r.volumen ? r.volumen + " · " : ""}${r.titulo}`, r.tipo, r.portada],
+    fila: r => [`${r.titulo}${r.volumen ? " · " + r.volumen : ""}`, r.tipo, r.portada],
     campos: [
       { k: "titulo", l: "Título", t: "texto", req: 1 }, { k: "volumen", l: "Volumen", t: "texto", ayuda: "Solo si el libro es parte de una serie (ej.: Vol. I). Déjalo vacío si no." },
       { k: "subtitulo", l: "Subtítulo", t: "texto", ancho: 1 },
@@ -120,12 +120,14 @@ async function entrar(sesion) {
   pintarMenu(); abrir(vista);
 }
 
-// Solo «Tame, 400 años» lleva volumen: al entrar se borran los «Vol. II–V» antiguos
-// (equivale a supabase/04-volumenes.sql; no toca volúmenes escritos después a mano).
+// Solo «Los orígenes de Tame» lleva volumen (Vol. I): al entrar se corrigen los volúmenes antiguos
+// (equivale a supabase/04-volumenes.sql; no toca volúmenes escritos después con otro texto).
 async function quitarVolumenes() {
+  const t = "Los orígenes de Tame";
   await sb.from("publicaciones").update({ volumen: null })
-    .in("volumen", ["Vol. II", "Vol. III", "Vol. IV", "Vol. V"])
-    .neq("titulo", "Tame, 400 años");
+    .in("volumen", ["Vol. I", "Vol. II", "Vol. III", "Vol. IV", "Vol. V"]).neq("titulo", t);
+  await sb.from("publicaciones").update({ volumen: "Vol. I" })
+    .eq("titulo", t).or("volumen.is.null,volumen.eq.\"Vol. III\"");
 }
 
 // ── Menú lateral ──

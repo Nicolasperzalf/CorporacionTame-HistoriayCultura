@@ -290,7 +290,7 @@ V.publicaciones = () => {
   <section class="seccion" data-screen-label="V · Publicaciones">
     <div class="cabecera" data-rv>
       <div><p class="antetitulo">Capítulo V · Publicaciones</p><h1 class="titulo">El territorio <em style="color:var(--perla)">también se lee.</em></h1></div>
-      <div class="pestanas" role="tablist" aria-label="Libros">${P.map((b, i) => `<button type="button" role="tab" class="pestana" data-lib="${i}">${b.volumen ? esc(b.volumen) + " · " : ""}${esc(b.titulo)}</button>`).join("")}</div>
+      <div class="pestanas" role="tablist" aria-label="Libros">${P.map((b, i) => `<button type="button" role="tab" class="pestana" data-lib="${i}">${esc(b.titulo)}${b.volumen ? " · " + esc(b.volumen) : ""}</button>`).join("")}</div>
     </div>
     <div class="libro-caja vidrio" data-rv data-rv-delay="100">
       <div class="libro-escena" id="lib-escena">
@@ -328,7 +328,7 @@ M.publicaciones = () => {
     $("#lib-sombra").style.width = px(W);
     aplicar();
     info.innerHTML = `
-      <p class="tipo">${b.volumen ? esc(b.volumen) + " · " : ""}${esc(b.tipo)}</p>
+      <p class="tipo">${esc(b.tipo)}${b.volumen ? " · " + esc(b.volumen) : ""}</p>
       <h2>${esc(b.titulo)}</h2>
       ${b.subtitulo ? `<p class="sub">${esc(b.subtitulo)}</p>` : ""}
       <p class="ctx">De la contraportada</p>

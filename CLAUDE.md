@@ -17,7 +17,7 @@ Publicado en: https://nicolasperzalf.github.io/CorporacionTame-HistoriayCultura/
 - `js/escena3d.js` — fondo three.js (three@0.184.0 por import dinámico): estrellas warp + reloj de bolsillo dorado; el logotipo es la esfera; las manecillas marcan la hora del capítulo (Inicio = XII, I…VI).
 - `js/datos.js` — lee Supabase; si falla usa `js/contenido-local.js`. Publicaciones: si la tabla no tiene la columna `lomo`, usa los libros locales.
 - `admin/` — panel (Supabase Auth). Campos de cada sección en `admin/admin.js`.
-- `supabase/01-esquema.sql`, `02-datos-iniciales.sql`, `03-libros.sql` (añade columna `lomo` y reemplaza los 5 libros), `04-volumenes.sql` (solo "Tame, 400 años" lleva volumen).
+- `supabase/01-esquema.sql`, `02-datos-iniciales.sql`, `03-libros.sql` (añade columna `lomo` y reemplaza los 5 libros), `04-volumenes.sql` (solo "Los orígenes de Tame" lleva volumen: Vol. I).
 - Si cambias contenido, mantén sincronizados `contenido-local.js` y los SQL.
 
 ## Diseño (no cambiar sin pedirlo)
