@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Administración · Corporación Tame, Historia y Cultura</title>
+  <link rel="icon" href="../assets/logo.jpeg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+  <script type="module" src="admin.js"></script>
+</head>
+<body>
+  <!-- Acceso -->
+  <section id="acceso" class="acceso" hidden>
+    <form id="form-acceso" class="tarjeta acceso-caja">
+      <img src="../assets/logo.jpeg" alt="" class="acceso-logo">
+      <h1>Panel de administración</h1>
+      <p class="suave">Corporación Tame, Historia y Cultura</p>
+      <label>Correo<input name="email" type="email" required autocomplete="username"></label>
+      <label>Contraseña<input name="clave" type="password" required autocomplete="current-password"></label>
+      <button type="submit" class="btn primario">Entrar</button>
+      <button type="button" class="btn enlace" id="olvide">¿Olvidaste tu contraseña?</button>
+      <p class="msg" id="msg-acceso" role="status"></p>
+    </form>
+  </section>
+
+  <!-- Sin configurar -->
+  <section id="sin-config" class="acceso" hidden>
+    <div class="tarjeta acceso-caja">
+      <h1>Falta conectar la base de datos</h1>
+      <p>Abre <code>js/config.js</code> y pega la <b>Project URL</b> y la clave <b>anon public</b> de tu proyecto de Supabase. Los pasos están en <code>README.md</code>.</p>
+      <a class="btn" href="../">Volver al sitio</a>
+    </div>
+  </section>
+
+  <!-- Panel -->
+  <div id="panel" class="panel" hidden>
+    <header class="cabecera">
+      <a href="../" class="marca" target="_blank" rel="noopener"><img src="../assets/logo.jpeg" alt=""><span>Corporación Tame <em>· Administración</em></span></a>
+      <div class="usuario"><span id="usuario-email"></span><button type="button" class="btn" id="salir">Salir</button></div>
+    </header>
+    <div class="cuerpo">
+      <nav class="menu" id="menu" aria-label="Secciones"></nav>
+      <main class="contenido" id="contenido"></main>
+    </div>
+  </div>
+
+  <div id="aviso" class="aviso" role="status" hidden></div>
+</body>
+</html>

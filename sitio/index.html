@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Corporación Tame, Historia y Cultura</title>
+  <meta name="description" content="Viaja cuatro siglos sin salir de Tame: historia, monumentos, símbolos y memoria viva de Tame, Arauca.">
+  <meta property="og:title" content="Corporación Tame, Historia y Cultura">
+  <meta property="og:description" content="Viaja cuatro siglos sin salir de Tame.">
+  <meta property="og:image" content="assets/logo.jpeg">
+  <link rel="icon" href="assets/logo.jpeg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <!-- Fondo espacial + emblema 3D (js/escena3d.js) -->
+  <canvas id="espacio" aria-hidden="true"></canvas>
+
+  <!-- Precarga -->
+  <div id="precarga" role="status" aria-label="Cargando">
+    <div class="pre-logo">
+      <div class="pre-aro">
+        <span class="pre-progreso"></span>
+        <span class="pre-img"><img src="assets/logo.jpeg" alt="Corporación Tame, Historia y Cultura"></span>
+      </div>
+      <span class="pre-pct">000</span>
+    </div>
+  </div>
+
+  <!-- Cortina de viaje entre capítulos -->
+  <div id="viaje" aria-hidden="true">
+    <div><span class="viaje-k">Viajando a · Capítulo <b id="viaje-n"></b></span><span class="viaje-t" id="viaje-t"></span></div>
+  </div>
+
+  <div id="cursor" aria-hidden="true"></div>
+
+  <!-- Menú con todas las secciones -->
+  <div id="menu" role="dialog" aria-modal="true" aria-label="Todas las secciones" hidden>
+    <div class="menu-in">
+      <div class="menu-top">
+        <button type="button" class="menu-inicio" data-ir="inicio"><img src="assets/logo.jpeg" alt="">Inicio</button>
+        <button type="button" class="menu-cerrar" data-menu="cerrar" aria-label="Cerrar">✕</button>
+      </div>
+      <nav aria-label="Secciones" id="menu-nav"></nav>
+    </div>
+  </div>
+
+  <div class="app" id="app">
+    <aside class="riel">
+      <button type="button" class="logo-btn" data-ir="inicio" aria-label="Inicio"><img src="assets/logo.jpeg" alt=""></button>
+      <button type="button" class="hamburguesa" data-menu="abrir" aria-label="Abrir todas las secciones"><span></span></button>
+      <nav aria-label="Capítulos" id="riel-nav"></nav>
+    </aside>
+
+    <div class="columna">
+      <header class="barra-movil">
+        <button type="button" class="logo-btn" data-ir="inicio" aria-label="Inicio"><img src="assets/logo.jpeg" alt=""></button>
+        <button type="button" class="hamburguesa" data-menu="abrir" aria-label="Abrir todas las secciones"><span></span></button>
+        <nav aria-label="Capítulos" id="movil-nav"></nav>
+      </header>
+
+      <!-- Cada capítulo se dibuja aquí desde js/app.js -->
+      <main id="vista"></main>
+
+      <div class="siguiente-caja">
+        <button type="button" class="siguiente tilt" id="siguiente"><span><small></small><b></b></span><i>→</i></button>
+      </div>
+
+      <footer class="pie">
+        <div class="pie-fila">
+          <div class="pie-marca">
+            <span class="logo-circ"><img src="assets/logo.jpeg" alt="Logotipo de la Corporación Tame, Historia y Cultura"></span>
+            <span>Corporación Tame, <em>Historia y Cultura</em></span>
+          </div>
+          <div class="pie-contacto">
+            <p class="etiqueta">Información de contacto</p>
+            <div class="redes">
+              <a id="red-fb" href="#" target="_blank" rel="noopener noreferrer" aria-label="Facebook de la Corporación">
+                <span><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H7.8v3h2.6V21z"/></svg></span>Facebook
+              </a>
+              <a id="red-ig" href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram de la Corporación">
+                <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg></span>Instagram
+              </a>
+              <a id="red-mail" href="#">
+                <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></span><em id="red-mail-t" style="font-style:normal"></em>
+              </a>
+            </div>
+            <span class="pie-lugar" id="pie-lugar"></span>
+          </div>
+        </div>
+        <p class="pie-legal"><span>© <span id="anio"></span> · Corporación Tame, Historia y Cultura</span><a href="admin/index.html">Administración</a></p>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
