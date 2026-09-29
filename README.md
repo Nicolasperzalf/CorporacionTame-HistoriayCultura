@@ -9,6 +9,7 @@ El contenido se edita desde **/admin**, así que no hace falta tocar código par
 
 ```
 sitio/
+├── CLAUDE.md               Instrucciones para Claude Code
 ├── index.html              Página pública (estructura general)
 ├── css/
 │   └── styles.css          Todos los estilos (colores y tipografías arriba, en :root)
@@ -16,18 +17,17 @@ sitio/
 │   ├── config.js           ← AQUÍ se pegan la URL y la clave de Supabase
 │   ├── app.js              Capítulos, navegación y efectos
 │   ├── datos.js            Lee la base de datos y envía los aportes
-│   ├── escena3d.js         Fondo espacial y moneda 3D con el logo
+│   ├── escena3d.js         Fondo espacial y reloj de bolsillo 3D con el logo
 │   └── contenido-local.js  Copia de respaldo del contenido (si la base no responde)
 ├── admin/
 │   ├── index.html          Panel de administración (usuario y contraseña)
 │   ├── admin.js            Lógica del panel (qué campos tiene cada sección)
 │   └── admin.css
-├── assets/
-│   ├── img/                Logo, monumentos, línea temporal, portadas de libros
-│   └── audio/              himno-tame.mp3 (pendiente de subir)
+├── assets/               Logo, monumentos, línea temporal, portadas de libros
 └── supabase/
     ├── 01-esquema.sql      Tablas, permisos y almacenamiento
-    └── 02-datos-iniciales.sql  Contenido actual del sitio
+    ├── 02-datos-iniciales.sql  Contenido inicial
+    └── 03-libros.sql       Lomos con imagen + 5 libros (ejecutar después del 02)
 ```
 
 ### Dónde vive cada contenido
@@ -39,9 +39,8 @@ sitio/
 | II · Tribuna de la Memoria | `columnas` | Tribuna de la Memoria |
 | III · Salón de monumentos | `monumentos` | Salón de monumentos |
 | IV · Línea temporal | `hitos` | Línea temporal |
-| V · Símbolos | `bandera`, `himno` | Bandera · Himno de Tame |
-| VI · Publicaciones | `publicaciones` | Publicaciones |
-| VII · Aporte ciudadano | `aportes` (lo que envía la gente) | Aportes ciudadanos |
+| V · Publicaciones | `publicaciones` | Publicaciones |
+| VI · Aporte ciudadano | `aportes` (lo que envía la gente) | Aportes ciudadanos |
 | Pie · redes y correo | `ajustes` | Textos y contacto |
 
 ---
@@ -89,7 +88,6 @@ Los cambios se ven al recargar el sitio; no hay que volver a subir archivos a Gi
 ### Cambios que sí se hacen en GitHub
 - Colores, tipografías o diseño → `css/styles.css`.
 - Nombres de los capítulos o su orden → `PAGES` en `js/app.js`.
-- Audio del himno → sube `himno-tame.mp3` a `assets/audio/` (o pega un enlace en *Textos y contacto → audio del himno*).
 
 ---
 

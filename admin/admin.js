@@ -55,7 +55,7 @@ const TABLAS = {
   },
   publicaciones: {
     nombre: "Publicaciones", unidad: "libro", orden: ["orden", true],
-    ayuda: "Libros que se muestran en 3D. Sube portada y contraportada de buena calidad.",
+    ayuda: "Libros que se muestran en 3D. Sube portada, contraportada y (opcional) la foto del lomo en vertical. La descripción es el texto de la contraportada.",
     fila: r => [`${r.volumen || ""} · ${r.titulo}`, r.tipo, r.portada],
     campos: [
       { k: "titulo", l: "Título", t: "texto", req: 1 }, { k: "volumen", l: "Volumen", t: "texto", ayuda: "Ej.: Vol. III" },
@@ -64,6 +64,7 @@ const TABLAS = {
       { k: "autores", l: "Autores", t: "texto", ancho: 1 },
       { k: "descripcion", l: "Descripción", t: "area", ancho: 1 },
       { k: "portada", l: "Portada", t: "imagen", ancho: 1 }, { k: "contraportada", l: "Contraportada", t: "imagen", ancho: 1 },
+      { k: "lomo", l: "Imagen del lomo (vertical, opcional)", t: "imagen", ancho: 1 },
       { k: "texto_lomo", l: "Texto del lomo", t: "texto" }, { k: "grosor", l: "Grosor del lomo (px)", t: "numero", def: 30 },
       { k: "color_lomo", l: "Color del lomo", t: "color", def: "#d9d8d1" }, { k: "color_tinta_lomo", l: "Color del texto del lomo", t: "color", def: "#1f2924" },
       { k: "publicado", l: "Visible en el sitio", t: "si-no", def: true }

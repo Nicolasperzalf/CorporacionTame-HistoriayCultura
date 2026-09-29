@@ -313,14 +313,14 @@ M.publicaciones = () => {
   const px = v => Math.round(v) + "px";
   const aplicar = () => { const l = $("#libro"); if (l) l.style.transform = `rotateX(${rot.x.toFixed(1)}deg) rotateY(${rot.y.toFixed(1)}deg)`; };
   const pintar = () => {
-    const b = P[libI], W = innerWidth >= 700 ? 280 : 210;
+    const b = P[libI], W = innerWidth >= 700 ? 280 : 210, esVerso = /\n(?!\n)/.test(b.descripcion || "");
     const ratio = proporciones[b.portada] || 1.41, H = W * ratio, D = (b.grosor || 30) * W / 280;
     if (!proporciones[b.portada] && b.portada) { const im = new Image(); im.onload = () => { proporciones[b.portada] = im.naturalHeight / im.naturalWidth; if (P[libI] === b) pintar(); }; im.src = b.portada; }
     persp.innerHTML = `
       <div class="libro" id="libro" style="width:${px(W)};height:${px(H)}">
         <img src="${esc(b.portada)}" alt="Portada de ${esc(b.titulo)}" draggable="false" style="transform:translateZ(${px(D / 2)})">
         <img src="${esc(b.contraportada || b.portada)}" alt="Contraportada de ${esc(b.titulo)}" draggable="false" style="transform:rotateY(180deg) translateZ(${px(D / 2)})">
-        <div class="lomo" style="left:${px((W - D) / 2)};width:${px(D)};background:${esc(b.color_lomo)};color:${esc(b.color_tinta_lomo)};transform:rotateY(-90deg) translateZ(${px(W / 2)})"><span style="font-size:${px(Math.min(D * .46, 15))}">${esc(b.texto_lomo || b.titulo)}</span></div>
+        <div class="lomo" style="left:${px((W - D) / 2)};width:${px(D)};background:${esc(b.color_lomo)}${b.lomo ? ` url('${esc(b.lomo)}') center/100% 100% no-repeat` : ""};color:${esc(b.color_tinta_lomo)};transform:rotateY(-90deg) translateZ(${px(W / 2)})">${b.lomo ? "" : `<span style="font-size:${px(Math.min(D * .5, 13))}">${esc(b.texto_lomo || b.titulo)}</span>`}</div>
         <div class="hojas-v" style="left:${px((W - D) / 2)};width:${px(D)};transform:rotateY(90deg) translateZ(${px(W / 2)})"></div>
         <div class="hojas-h" style="top:${px((H - D) / 2)};height:${px(D)};transform:rotateX(90deg) translateZ(${px(H / 2)})"></div>
         <div class="hojas-h" style="top:${px((H - D) / 2)};height:${px(D)};transform:rotateX(-90deg) translateZ(${px(H / 2)})"></div>
@@ -331,7 +331,8 @@ M.publicaciones = () => {
       <p class="tipo">${esc(b.volumen)} · ${esc(b.tipo)}</p>
       <h2>${esc(b.titulo)}</h2>
       ${b.subtitulo ? `<p class="sub">${esc(b.subtitulo)}</p>` : ""}
-      <div class="desc">${parrafos(b.descripcion).map(p => `<p>${esc(p)}</p>`).join("")}</div>
+      <p class="ctx">De la contraportada</p>
+      <div class="desc${esVerso ? " verso" : ""}">${parrafos(b.descripcion).map(p => `<p>${esc(p)}</p>`).join("")}</div>
       ${b.autores ? `<p class="autores"><b>AUTORES · </b>${esc(b.autores)}</p>` : ""}
       <button type="button" class="btn-oro" data-ir="aportar">Solicitar ejemplar →</button>`;
     $$("[data-lib]").forEach(t => t.setAttribute("aria-selected", +t.dataset.lib === libI));

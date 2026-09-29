@@ -25,7 +25,9 @@ export async function cargarContenido() {
     ]);
     const ajustes = { ...LOCAL.ajustes };
     aj.forEach(a => { if (a.valor !== null && a.valor !== "") ajustes[a.clave] = a.valor; });
-    return { ajustes, columnas, monumentos, hitos, publicaciones };
+    // Si la base aún no tiene la migración 03 (columna "lomo"), se usan los libros de respaldo.
+    const pubs = publicaciones.length && publicaciones.some(p => "lomo" in p) ? publicaciones : LOCAL.publicaciones;
+    return { ajustes, columnas, monumentos, hitos, publicaciones: pubs };
   } catch (e) {
     console.warn("No se pudo leer la base de datos; se usa el contenido de respaldo.", e);
     return LOCAL;

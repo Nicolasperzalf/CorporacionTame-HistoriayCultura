@@ -73,6 +73,7 @@ create table if not exists public.publicaciones (          -- VI · Publicacione
   texto_lomo text,
   portada text,
   contraportada text,
+  lomo text,                                                -- imagen del lomo (opcional)
   color_lomo text default '#d9d8d1',
   color_tinta_lomo text default '#1f2924',
   grosor int default 30,
