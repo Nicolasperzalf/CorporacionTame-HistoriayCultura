@@ -23,7 +23,7 @@ Publicado en: https://nicolasperzalf.github.io/CorporacionTame-HistoriayCultura/
 ## Diseño (no cambiar sin pedirlo)
 - Nombre: "Corporación Tame, Historia y Cultura". Conservar el logotipo (`assets/logo.jpeg`).
 - Fondo #0B0E14 / #050505, oro #C5A059 / #8B6B3D, perla #F3EFE7. Bandera: verde #2f7a45, rojo #b3322b.
-- Tipos: Playfair Display (titulares), Cinzel (numerales), Space Grotesk (UI, ≥12px).
+- Tipos: Lora (titulares, más legible), Cinzel (numerales), Space Grotesk (UI, ≥12px).
 - Tono: serio, territorial, respetuoso con la memoria local. Sin emojis.
 - 6 capítulos: I Quiénes somos · II Tribuna de la Memoria · III Salón de monumentos · IV Línea temporal · V Publicaciones · VI Aporte ciudadano.
 
