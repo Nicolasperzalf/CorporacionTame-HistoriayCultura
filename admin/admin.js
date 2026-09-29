@@ -56,9 +56,9 @@ const TABLAS = {
   publicaciones: {
     nombre: "Publicaciones", unidad: "libro", orden: ["orden", true],
     ayuda: "Libros que se muestran en 3D. Sube portada, contraportada y (opcional) la foto del lomo en vertical. La descripción es el texto de la contraportada.",
-    fila: r => [`${r.volumen || ""} · ${r.titulo}`, r.tipo, r.portada],
+    fila: r => [`${r.volumen ? r.volumen + " · " : ""}${r.titulo}`, r.tipo, r.portada],
     campos: [
-      { k: "titulo", l: "Título", t: "texto", req: 1 }, { k: "volumen", l: "Volumen", t: "texto", ayuda: "Ej.: Vol. III" },
+      { k: "titulo", l: "Título", t: "texto", req: 1 }, { k: "volumen", l: "Volumen", t: "texto", ayuda: "Solo si el libro es parte de una serie (ej.: Vol. I). Déjalo vacío si no." },
       { k: "subtitulo", l: "Subtítulo", t: "texto", ancho: 1 },
       { k: "tipo", l: "Tipo o tema", t: "texto" }, { k: "orden", l: "Orden", t: "numero", def: 0 },
       { k: "autores", l: "Autores", t: "texto", ancho: 1 },

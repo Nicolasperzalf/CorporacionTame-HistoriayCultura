@@ -51,7 +51,7 @@ export async function iniciarEscena(canvas, S, alListo) {
   const k = 0.9; tex.repeat.set(k, k); tex.offset.set((1 - k) / 2 + 0.001, (1 - k) / 2 - 0.004);
   const face = new THREE.MeshPhysicalMaterial({ name: "logotipo", map: tex, emissiveMap: tex, emissive: 0xffffff, emissiveIntensity: 0.22, metalness: 0.35, roughness: 0.34, clearcoat: 1, clearcoatRoughness: 0.08 });
 
-  const steel = new THREE.MeshPhysicalMaterial({ name: "acero", color: 0x151a22, metalness: 0.9, roughness: 0.28, clearcoat: 1 });
+  const steel = new THREE.MeshPhysicalMaterial({ name: "marron", color: 0x5a3519, metalness: 0.55, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.15 });
   const emblem = new THREE.Group(); scene.add(emblem);
   const medal = new THREE.Group(); medal.scale.setScalar(0.8); emblem.add(medal);
   const add = (geo, mat, parent, p, r) => { const m = new THREE.Mesh(geo, mat); if (p) m.position.set(...p); if (r) m.rotation.set(...r); parent.add(m); return m; };
