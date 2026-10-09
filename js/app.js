@@ -290,7 +290,7 @@ V.publicaciones = () => {
   <section class="seccion" data-screen-label="V · Publicaciones">
     <div class="cabecera" data-rv>
       <div><p class="antetitulo">Capítulo V · Publicaciones</p><h1 class="titulo">El territorio <em style="color:var(--perla)">también se lee.</em></h1></div>
-      <div class="pestanas" role="tablist" aria-label="Libros">${P.map((b, i) => `<button type="button" role="tab" class="pestana" data-lib="${i}">${esc(b.titulo)}${b.volumen ? " · " + esc(b.volumen) : ""}</button>`).join("")}</div>
+      <div class="pestanas" role="tablist" aria-label="Libros">${P.map((b, i) => `<button type="button" role="tab" class="pestana tilt" data-lib="${i}"><span class="pestana-tapa" aria-hidden="true">${b.portada ? `<img src="${esc(b.portada)}" alt="" loading="lazy">` : ""}</span><span class="pestana-txt"><span class="pestana-tit">${esc(b.titulo)}${b.volumen ? " · " + esc(b.volumen) : ""}</span>${b.tipo ? `<span class="pestana-tipo">${esc(b.tipo)}</span>` : ""}</span></button>`).join("")}</div>
     </div>
     <div class="libro-caja vidrio" data-rv data-rv-delay="100">
       <div class="libro-escena" id="lib-escena">
