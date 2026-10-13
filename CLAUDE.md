@@ -17,10 +17,12 @@ Publicado en: https://nicolasperzalf.github.io/CorporacionTame-HistoriayCultura/
 - `js/escena3d.js` — fondo three.js (three@0.184.0 por import dinámico): estrellas warp + reloj de bolsillo dorado; el logotipo es la esfera; las manecillas marcan la hora del capítulo (Inicio = XII, I…VI).
 - `js/datos.js` — lee Supabase; si falla usa `js/contenido-local.js`. Publicaciones: si la tabla no tiene la columna `lomo`, usa los libros locales.
 - `admin/` — panel (Supabase Auth). Campos de cada sección en `admin/admin.js`.
-- `supabase/01-esquema.sql`, `02-datos-iniciales.sql`, `03-libros.sql` (añade columna `lomo` y reemplaza los 5 libros), `04-volumenes.sql` (solo "Los orígenes de Tame" lleva volumen: Vol. I), `05-libros-nuevos.sql` (añade «Río Arauca» y «La Mujer de la Luna»).
+- `supabase/01-esquema.sql`, `02-datos-iniciales.sql`, `03-libros.sql` (añade columna `lomo` y reemplaza los 5 libros), `04-volumenes.sql` (solo "Los orígenes de Tame" lleva volumen: Vol. I), `05-libros-nuevos.sql` (añade «Río Arauca» y «La Mujer de la Luna»), `06-whatsapp.sql` (WhatsApp en ajustes, quita Facebook/Instagram, columna `whatsapp` por libro).
 - Si cambias contenido, mantén sincronizados `contenido-local.js` y los SQL.
 
 ## Diseño (no cambiar sin pedirlo)
+- Contacto: solo WhatsApp (573222070839, clave `whatsapp` en ajustes) y correo. Sin Facebook ni Instagram (no son de la Corporación).
+- «Solicitar ejemplar» abre WhatsApp con el nombre del libro; usa `publicaciones.whatsapp` si existe, si no el de la Corporación.
 - Precarga: el contador va de 1629 (fundación de La Palma de Espinosa) a 2029 (Tame, 400 años).
 - Nombre: "Corporación Tame, Historia y Cultura". Conservar el logotipo (`assets/logo.jpeg`).
 - Fondo #0B0E14 / #050505, oro #C5A059 / #8B6B3D, perla #F3EFE7. Bandera: verde #2f7a45, rojo #b3322b.
@@ -29,7 +31,8 @@ Publicado en: https://nicolasperzalf.github.io/CorporacionTame-HistoriayCultura/
 - 6 capítulos: I Quiénes somos · II Tribuna de la Memoria · III Salón de monumentos · IV Línea temporal · V Publicaciones · VI Aporte ciudadano.
 
 ## Pendientes conocidos
-1. Confirmar con el usuario que ejecutó `supabase/03-libros.sql`, `04-volumenes.sql` y `05-libros-nuevos.sql` en Supabase (SQL Editor).
+1. Confirmar con el usuario que ejecutó `supabase/05-libros-nuevos.sql` y `06-whatsapp.sql` en Supabase (SQL Editor). (03 y 04 ya están aplicados.)
+   - Falta el número de WhatsApp de pedidos de «Río Arauca» (autor Eddy Arley Cristiano Medina); mientras tanto usa el de la Corporación.
 2. Faltan fotos de lomo de "De Macaguán a Corocito" y "Los jagüeyes" (hoy usan color + texto).
    - «Río Arauca» y «La Mujer de la Luna»: contraportadas PROVISIONALES diseñadas (no son las reales); portada y lomo salen de fotos del usuario. Cambiar cuando haya foto real de la contraportada. «Río Arauca» aún no tiene reseña real.
 3. Propuesta: galería pública "Archivo ciudadano" en Cap. VI con aportes aprobados + casilla de consentimiento en el formulario.

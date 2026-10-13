@@ -13,6 +13,11 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pad = n => String(n).padStart(2, "0");
+// WhatsApp: número de la corporación por defecto (se puede cambiar en /admin → Textos y contacto)
+const WA_CORPORACION = "573222070839";
+const numeroWa = n => { const d = String(n || "").replace(/\D/g, ""); return d.length === 10 ? "57" + d : d; };
+const enlaceWa = (n, msg) => `https://wa.me/${numeroWa(n || WA_CORPORACION)}?text=${encodeURIComponent(msg)}`;
+const verNumero = n => { const d = numeroWa(n || WA_CORPORACION).replace(/^57/, ""); return d.length === 10 ? `${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}` : d; };
 const parrafos = t => String(t || "").split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
 const lineas = t => String(t || "").split("\n").map(x => x.trim()).filter(Boolean);
 const TZ = "America/Bogota";
@@ -335,7 +340,7 @@ M.publicaciones = () => {
       <p class="ctx">Sobre el libro</p>
       <div class="desc${esVerso ? " verso" : ""}">${parrafos(b.descripcion).map(p => `<p>${esc(p)}</p>`).join("")}</div>
       ${b.autores ? `<p class="autores"><b>${/,| y /.test(b.autores) ? "AUTORES" : "AUTOR"} · </b>${esc(b.autores)}</p>` : ""}
-      <button type="button" class="btn-oro" data-ir="aportar">Solicitar ejemplar →</button>`;
+      <a class="btn-oro" href="${esc(enlaceWa(b.whatsapp || A.whatsapp, `Hola, estoy interesado en comprar el libro «${b.titulo}${b.volumen ? ", " + b.volumen : ""}». ¿Me pueden dar información sobre precio y entrega?`))}" target="_blank" rel="noopener noreferrer">Solicitar ejemplar →</a>`;
     $$("[data-lib]").forEach(t => t.setAttribute("aria-selected", +t.dataset.lib === libI));
   };
   const etiqueta = () => { giroBtn.textContent = giro ? "❚❚ Detener giro" : "↻ Girar 360°"; };
@@ -493,7 +498,7 @@ function construirNav() {
   $("#menu-nav").innerHTML = cap.map(p => `<button type="button" data-ir="${p.id}" data-nav="${p.id}"><b>${p.n}</b><span>${p.label}</span></button>`).join("");
 }
 function pie() {
-  $("#red-fb").href = A.facebook; $("#red-ig").href = A.instagram;
+  $("#red-wa").href = enlaceWa(A.whatsapp, "Hola, quisiera información sobre la Corporación Tame, Historia y Cultura."); $("#red-wa-t").textContent = "WhatsApp · " + verNumero(A.whatsapp);
   $("#red-mail").href = "mailto:" + A.correo; $("#red-mail").setAttribute("aria-label", "Escribir a " + A.correo); $("#red-mail-t").textContent = A.correo;
   $("#pie-lugar").textContent = A.ubicacion; $("#anio").textContent = new Date().getFullYear();
 }

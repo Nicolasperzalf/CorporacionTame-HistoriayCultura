@@ -62,6 +62,7 @@ const TABLAS = {
       { k: "subtitulo", l: "Subtítulo", t: "texto", ancho: 1 },
       { k: "tipo", l: "Tipo o tema", t: "texto" }, { k: "orden", l: "Orden", t: "numero", def: 0 },
       { k: "autores", l: "Autores", t: "texto", ancho: 1 },
+      { k: "whatsapp", l: "WhatsApp para pedidos (opcional)", t: "texto", ayuda: "Solo si este libro se pide a otro número (ej.: 3001234567). Vacío = el WhatsApp de la Corporación." },
       { k: "descripcion", l: "Descripción", t: "area", ancho: 1 },
       { k: "portada", l: "Portada", t: "imagen", ancho: 1 }, { k: "contraportada", l: "Contraportada", t: "imagen", ancho: 1 },
       { k: "lomo", l: "Imagen del lomo (vertical, opcional)", t: "imagen", ancho: 1 },

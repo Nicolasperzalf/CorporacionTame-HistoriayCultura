@@ -52,7 +52,7 @@ button { cursor: pointer; }
 .cabecera { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px 48px; margin-bottom: clamp(32px, 4vw, 56px); }
 .lead { margin: 0; max-width: 340px; font-size: 16px; line-height: 1.65; color: var(--texto-2); }
 
-.btn-oro { display: inline-flex; align-items: center; justify-content: center; gap: 14px; min-height: 52px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--oro); color: var(--noche); font-size: 15px; font-weight: 600; letter-spacing: .02em; white-space: nowrap; transition: background .3s, box-shadow .4s, transform .45s var(--curva-2); }
+.btn-oro { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 14px; min-height: 52px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--oro); color: var(--noche); font-size: 15px; font-weight: 600; letter-spacing: .02em; white-space: nowrap; transition: background .3s, box-shadow .4s, transform .45s var(--curva-2); }
 .btn-oro:hover { background: var(--oro-hover); box-shadow: 0 10px 40px -8px rgba(197, 160, 89, .55); }
 .btn-linea { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border: 1px solid rgba(255, 255, 255, .2); border-radius: 999px; background: rgba(11, 14, 20, .5); color: var(--perla); font-size: 15px; white-space: nowrap; transition: border-color .3s, color .3s, background .3s, transform .45s var(--curva-2); }
 .btn-linea:hover { border-color: var(--oro); color: var(--oro-claro); }
