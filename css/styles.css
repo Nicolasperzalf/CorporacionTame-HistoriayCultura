@@ -81,6 +81,7 @@ button { cursor: pointer; }
 #precarga .pre-img { width: 140px; height: 140px; border-radius: 50%; overflow: hidden; }
 #precarga .pre-img img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.14); }
 #precarga .pre-pct { font-family: var(--f-numeral); font-size: clamp(36px, 5vw, 56px); letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+#precarga .pre-lema { margin-top: -18px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--oro); }
 #precarga.sale { opacity: 0; pointer-events: none; }
 #precarga.sale .pre-logo { transform: scale(7); opacity: 0; }
 
@@ -307,7 +308,8 @@ body.intro .aparece { opacity: 1; transform: none; }
 .libro-info .autores b { font-size: 12px; font-weight: 400; letter-spacing: .14em; color: var(--oro); }
 .libro-info .btn-oro { align-self: flex-start; }
 /* Índice de libros: fichas rectangulares con miniatura de portada */
-.pestanas { flex: 1 1 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 1px; background: var(--linea); border: 1px solid var(--linea); }
+.pestanas { flex: 1 1 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 1px; padding: 1px; }
+.pestanas .pestana { box-shadow: 0 0 0 1px var(--linea); }
 .pestana { position: relative; display: flex; align-items: center; gap: 16px; min-height: 108px; padding: 14px 18px 14px 16px; border: 0; border-radius: 0; background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(197, 160, 89, .16), transparent 70%) no-repeat, rgba(11, 14, 20, .86); background-size: 0 0, auto; color: var(--texto-2); text-align: left; cursor: pointer; overflow: hidden; transition: color .3s, transform .5s var(--curva-2); }
 .pestana:hover { background-size: 100% 100%, auto; color: var(--perla); }
 .pestana:active { transform: scale(.98) !important; }

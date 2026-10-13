@@ -332,9 +332,9 @@ M.publicaciones = () => {
       <h2>${esc(b.titulo)}</h2>
       ${b.volumen ? `<p class="vol">${esc(b.volumen)}</p>` : ""}
       ${b.subtitulo ? `<p class="sub">${esc(b.subtitulo)}</p>` : ""}
-      <p class="ctx">De la contraportada</p>
+      <p class="ctx">Sobre el libro</p>
       <div class="desc${esVerso ? " verso" : ""}">${parrafos(b.descripcion).map(p => `<p>${esc(p)}</p>`).join("")}</div>
-      ${b.autores ? `<p class="autores"><b>AUTORES · </b>${esc(b.autores)}</p>` : ""}
+      ${b.autores ? `<p class="autores"><b>${/,| y /.test(b.autores) ? "AUTORES" : "AUTOR"} · </b>${esc(b.autores)}</p>` : ""}
       <button type="button" class="btn-oro" data-ir="aportar">Solicitar ejemplar →</button>`;
     $$("[data-lib]").forEach(t => t.setAttribute("aria-selected", +t.dataset.lib === libI));
   };
@@ -521,7 +521,7 @@ function precarga(listo) {
     const t = performance.now() - t0;
     let p = Math.min(1, t / 2200);
     if (!listo() && t < 7000) p = Math.min(p, .94);
-    aro.style.setProperty("--p", (p * 360).toFixed(1) + "deg"); pct.textContent = String(Math.round(p * 100)).padStart(3, "0");
+    aro.style.setProperty("--p", (p * 360).toFixed(1) + "deg"); pct.textContent = String(1629 + Math.round(p * 400));
     if (p >= 1) fin();
   }, 40);
   el.addEventListener("click", () => { if (listo()) fin(); });
