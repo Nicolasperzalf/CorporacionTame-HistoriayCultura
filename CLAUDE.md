@@ -17,7 +17,7 @@ Publicado en: https://nicolasperzalf.github.io/CorporacionTame-HistoriayCultura/
 - `js/escena3d.js` — fondo three.js (three@0.184.0 por import dinámico): estrellas warp + reloj de bolsillo dorado; el logotipo es la esfera; las manecillas marcan la hora del capítulo (Inicio = XII, I…VI).
 - `js/datos.js` — lee Supabase; si falla usa `js/contenido-local.js`. Publicaciones: si la tabla no tiene la columna `lomo`, usa los libros locales.
 - `admin/` — panel (Supabase Auth). Campos de cada sección en `admin/admin.js`.
-- `supabase/01-esquema.sql`, `02-datos-iniciales.sql`, `03-libros.sql` (añade columna `lomo` y reemplaza los 5 libros), `04-volumenes.sql` (solo "Los orígenes de Tame" lleva volumen: Vol. I), `05-libros-nuevos.sql` (añade «Río Arauca» y «La Mujer de la Luna»), `06-whatsapp.sql` (WhatsApp en ajustes, quita Facebook/Instagram, columna `whatsapp` por libro).
+- `supabase/01-esquema.sql`, `02-datos-iniciales.sql`, `03-libros.sql` (añade columna `lomo` y reemplaza los 5 libros), `04-volumenes.sql` (solo "Los orígenes de Tame" lleva volumen: Vol. I), `05-libros-nuevos.sql` (añade «Río Arauca» y «La Mujer de la Luna»), `06-whatsapp.sql` (WhatsApp en ajustes, quita Facebook/Instagram, columna `whatsapp` por libro), `07-limpiar-saltos.sql` (convierte los "\n" guardados como texto en saltos de línea reales).
 - Si cambias contenido, mantén sincronizados `contenido-local.js` y los SQL.
 
 ## Diseño (no cambiar sin pedirlo)
@@ -31,7 +31,7 @@ Publicado en: https://nicolasperzalf.github.io/CorporacionTame-HistoriayCultura/
 - 6 capítulos: I Quiénes somos · II Tribuna de la Memoria · III Salón de monumentos · IV Línea temporal · V Publicaciones · VI Aporte ciudadano.
 
 ## Pendientes conocidos
-1. Confirmar con el usuario que ejecutó `supabase/05-libros-nuevos.sql` y `06-whatsapp.sql` en Supabase (SQL Editor). (03 y 04 ya están aplicados.)
+1. Confirmar con el usuario que ejecutó `supabase/05-libros-nuevos.sql`, `06-whatsapp.sql` y `07-limpiar-saltos.sql` en Supabase (SQL Editor). (03 y 04 ya están aplicados.)
    - Falta el número de WhatsApp de pedidos de «Río Arauca» (autor Eddy Arley Cristiano Medina); mientras tanto usa el de la Corporación.
 2. Faltan fotos de lomo de "De Macaguán a Corocito" y "Los jagüeyes" (hoy usan color + texto).
    - «Río Arauca» y «La Mujer de la Luna»: contraportadas PROVISIONALES diseñadas (no son las reales); portada y lomo salen de fotos del usuario. Cambiar cuando haya foto real de la contraportada. «Río Arauca» aún no tiene reseña real.

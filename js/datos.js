@@ -3,6 +3,13 @@
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 import { LOCAL } from "./contenido-local.js";
 
+// Convierte "\\n" escrito como texto (dos caracteres) en un salto de línea real,
+// en todos los textos de todas las secciones, vengan de Supabase o del respaldo local.
+const limpiar = v => typeof v === "string" ? v.replace(/\\r\\n|\\n/g, "\n")
+  : Array.isArray(v) ? v.map(limpiar)
+  : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, limpiar(x)]))
+  : v;
+
 export const conectado = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 const BASE = (SUPABASE_URL || "").replace(/\/$/, "");
 const cab = extra => ({ apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, ...extra });
@@ -14,7 +21,7 @@ async function leer(tabla, orden) {
 }
 
 export async function cargarContenido() {
-  if (!conectado) return LOCAL;
+  if (!conectado) return limpiar(LOCAL);
   try {
     const [aj, columnas, monumentos, hitos, publicaciones] = await Promise.all([
       fetch(`${BASE}/rest/v1/ajustes?select=clave,valor`, { headers: cab() }).then(r => { if (!r.ok) throw new Error("ajustes"); return r.json(); }),
@@ -27,10 +34,10 @@ export async function cargarContenido() {
     aj.forEach(a => { if (a.valor !== null && a.valor !== "") ajustes[a.clave] = a.valor; });
     // Si la base aún no tiene la migración 03 (columna "lomo"), se usan los libros de respaldo.
     const pubs = publicaciones.length && publicaciones.some(p => "lomo" in p) ? publicaciones : LOCAL.publicaciones;
-    return { ajustes, columnas, monumentos, hitos, publicaciones: pubs };
+    return limpiar({ ajustes, columnas, monumentos, hitos, publicaciones: pubs });
   } catch (e) {
     console.warn("No se pudo leer la base de datos; se usa el contenido de respaldo.", e);
-    return LOCAL;
+    return limpiar(LOCAL);
   }
 }
 
