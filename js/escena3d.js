@@ -29,7 +29,7 @@ export async function iniciarEscena(canvas, S, alListo) {
   catch (e) { alListo(); return; }
 
   const small = () => innerWidth < 700 || S.coarse;
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, small() ? 1.5 : 1.75));
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); // más nitidez no se nota y cuesta fluidez
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;

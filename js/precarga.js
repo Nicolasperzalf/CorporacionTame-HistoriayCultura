@@ -97,16 +97,6 @@ const FRISO = [
   T("M1900 340C1910 330 1924 328 1934 334C1944 326 1960 326 1970 336")
 ];
 
-// Mensajes de etapa y datos de la época. El tercer valor indica si el texto es cita literal
-// (se muestra entre comillas) o un resumen (las palabras textuales van entre « » dentro del resumen).
-const ETAPAS = ["Encendiendo las estrellas", "Afinando el reloj", "Abriendo el archivo de Tame", "Llegando a 2029"];
-const DATOS = [
-  ["…el rio Tame, que baxa caudaloso de las nevadas de Chita, y tiene á sus riberas las dos numerosas Misiones de Giraras y de Betoyes", "José Gumilla, El Orinoco ilustrado, 1741", true],
-  ["Las canoas se ahuecaban con fuego, y los arcos, flechas y lanzas se labraban «de macana, palo durísimo».", "Según José Gumilla, El Orinoco ilustrado, 1741", false],
-  ["En la reducción de Tame se levantaron 18 caneyes, casas grandes, y se reunieron 450 indígenas.", "Según Julio César Lamus Gélvez, La ciudad La Palma de Espinosa", false],
-  ["Se untaban «desde la coronilla de la cabeza hasta las puntas de los piés» con aceite y achote: era su vestido y los protegía del sol y los zancudos.", "Según José Gumilla, El Orinoco ilustrado, 1741", false],
-  ["Hoy los betoyes, hitnü, makaguán, sikuani y u'wa siguen viviendo en el territorio de Tame.", "Memoria viva", false]
-];
 
 const NS = "http://www.w3.org/2000/svg";
 const lim = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -122,7 +112,7 @@ const lim = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
   const el = document.getElementById("precarga");
   const $ = s => el.querySelector(s);
-  const anio = $("#pre-anio"), msg = $("#pre-msg"), dato = $("#pre-dato"), cita = $("#pre-cita"), aro = $("#pre-aro"), puerta = $("#pre-puerta"), ya = $("#pre-ya");
+  const anio = $("#pre-anio"), msg = $("#pre-msg"), aro = $("#pre-aro"), puerta = $("#pre-puerta");
 
   // 1 · Construir el friso y las 12 marcas del aro
   const svg = $("#pre-friso"), caja = $(".pre-friso-caja");
@@ -132,10 +122,11 @@ export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
   const tramos = trazos.map(p => { const b = p.getBBox(), len = p.getTotalLength(); return { p, len, ini: lim(b.x / 2000 * 0.9), fin: lim((b.x + b.width) / 2000 * 0.9 + 0.1) }; });
   const marcas = [...aro.querySelectorAll(".marca")], avance = aro.querySelector(".aro-avance");
 
-  let paneo = 0, mostrado = 0, t0 = performance.now(), fin = false, iDato = -1, ultimoDato = -1e9, listoEn = 0, lento = false; // el primer dato se muestra de una vez
+  let paneo = 0, mostrado = 0, t0 = performance.now(), fin = false, listoEn = 0;
   // Mientras carga, lo de atrás no recibe foco ni clics
   const app = document.getElementById("app"); if (app) app.inert = true;
   const minimo = preferencia == null ? 3200 : 1800; // la primera visita se toma su tiempo para el dibujo
+  // La pantalla solo muestra el dibujo; el texto queda para lectores de pantalla
   const pintar = p => {
     anio.textContent = String(1629 + Math.round(p * 400));
     avance.style.strokeDashoffset = (1 - p).toFixed(4);
@@ -157,18 +148,11 @@ export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
       svg.style.transform = `translateX(${paneo.toFixed(1)}px)`;
     } else svg.style.transform = "";
     // solo se reescribe si cambia (es una región que leen los lectores de pantalla)
-    const texto = p >= 1 ? "Todo listo para el viaje" : lento ? "La conexión va lenta: el fondo 3D se sumará en el camino" : ETAPAS[Math.min(3, Math.floor(p * 4))];
+    const texto = p >= 1 ? "Todo listo para el viaje" : "Cargando";
     if (msg.textContent !== texto) msg.textContent = texto;
   };
-  const cambiarDato = () => {
-    iDato = (iDato + 1) % DATOS.length;
-    dato.classList.remove("ve"); void dato.offsetWidth;
-    const q = dato.querySelector("q"); q.textContent = DATOS[iDato][0]; q.classList.toggle("resumen", !DATOS[iDato][2]);
-    cita.textContent = DATOS[iDato][1];
-    dato.classList.add("ve");
-  };
   const mostrarPuerta = () => {
-    puerta.hidden = false; ya.hidden = true; el.classList.add("lista");
+    puerta.hidden = false; el.classList.add("lista");
     puerta.querySelector("[data-entrar='si']").focus({ preventScroll: true });
   };
   const entrar = conSonido => {
@@ -179,12 +163,10 @@ export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
     setTimeout(() => el.remove(), 1700);
   };
   puerta.addEventListener("click", e => { const b = e.target.closest("[data-entrar]"); if (b) entrar(b.dataset.entrar === "si"); });
-  ya.addEventListener("click", () => entrar(!!preferencia));
 
   if (reduce) { // sin animación: dibujo completo y entrada directa
-    pintar(1); cambiarDato();
-    if (preferencia == null) { const v = setInterval(() => { if (estado().contenido) { clearInterval(v); mostrarPuerta(); } }, 100); }
-    else { const v = setInterval(() => { if (estado().contenido) { clearInterval(v); entrar(preferencia); } }, 100); }
+    pintar(1);
+    const v = setInterval(() => { if (estado().contenido) { clearInterval(v); mostrarPuerta(); } }, 100);
     return;
   }
 
@@ -200,14 +182,13 @@ export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
     mostrado += (meta - mostrado) * 0.09;
     if (meta >= 1 && 1 - mostrado < 0.002) mostrado = 1;
     pintar(mostrado);
-    if (ahora - ultimoDato > 4200) { ultimoDato = ahora; cambiarDato(); }
-    // Conexión lenta: si el contenido ya está pero el fondo 3D no, se puede entrar ya
-    if (t > 6500 && e.contenido && !e.escena && ya.hidden && puerta.hidden) { ya.hidden = false; lento = true; }
+    // Conexión lenta: si el contenido ya está pero el fondo 3D no, se ofrece entrar ya (el fondo se suma después)
+    if (t > 6500 && e.contenido && !e.escena && puerta.hidden) mostrarPuerta();
     if (mostrado >= 1) {
       if (!listoEn) listoEn = ahora;
       if (ahora - listoEn > 450) { // pausa breve para ver el dibujo completo
-        if (preferencia == null) { if (puerta.hidden) mostrarPuerta(); }
-        else return entrar(preferencia);
+        // siempre se muestra la puerta: avisa que hay sonido y deja elegir (en iPhone el sonido solo arranca con un toque)
+        if (puerta.hidden) mostrarPuerta();
       }
     }
     requestAnimationFrame(bucle);

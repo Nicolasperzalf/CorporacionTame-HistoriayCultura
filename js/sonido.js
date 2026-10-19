@@ -1,15 +1,13 @@
 // ==========================================================
 //  Sonido del viaje (Web Audio, sin archivos: todo se sintetiza)
-//  Ambiente: un bordón grave y cálido, el viento del Llano y,
-//  a lo lejos, los grillos de la sabana de noche. El reloj marca
-//  cada segundo junto con el segundero del reloj 3D.
-//  Efectos: al cruzar una puerta suena un soplo que acelera con
-//  las estrellas, y al llegar, un arpegio de arpa (el arpa llanera)
-//  afinado en la "hora" de cada capítulo.
+//  Fondo: la brisa y las aves del Llano abierto.
+//  Arpa llanera: un glissando al cruzar una puerta, un arpegio al
+//  llegar (afinado en la «hora» de cada capítulo) y una cuerda suave
+//  al acercarse a una puerta.
 //  Solo suena si la persona lo elige; la elección se recuerda.
 // ==========================================================
 const CLAVE = "tame-sonido";
-let ctx = null, master = null, ambiente = null, activo = false, tics = null, grillos = null;
+let ctx = null, master = null, ambiente = null, activo = false, aves = null;
 const cuerdas = new Map(); // arpa: una nota por frecuencia, generada una sola vez
 
 // Notas de re mayor (tono habitual del joropo): cada capítulo es un grado de la escala
@@ -41,60 +39,46 @@ function ruido(tipo = "suave") {
   return (ruidos[tipo] = buf);
 }
 
-// Ambiente continuo: bordón (re y la graves) + viento
+// Ambiente del Llano abierto: brisa que sube y baja, y aves a lo lejos
 function crearAmbiente() {
   const salida = ctx.createGain(); salida.connect(master);
-  salida.gain.setValueAtTime(0, ctx.currentTime); salida.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 5); // el ambiente entra despacio
-  const filtro = ctx.createBiquadFilter(); filtro.type = "lowpass"; filtro.frequency.value = 380; filtro.Q.value = 0.6;
-  const bordon = ctx.createGain(); bordon.gain.value = 0.16; filtro.connect(bordon).connect(salida);
-  [[73.42, "sine", 0.9], [110.0, "sine", 0.55], [146.9, "triangle", 0.18], [110.4, "sine", 0.4]].forEach(([f, tipo, g]) => {
-    const o = ctx.createOscillator(), v = ctx.createGain(); o.type = tipo; o.frequency.value = f; v.gain.value = g; o.connect(v).connect(filtro); o.start();
-  });
-  // respiración lenta del bordón y del filtro
-  const lfo = ctx.createOscillator(), prof = ctx.createGain(); lfo.frequency.value = 0.045; prof.gain.value = 140; lfo.connect(prof).connect(filtro.frequency); lfo.start();
-  const lfo2 = ctx.createOscillator(), prof2 = ctx.createGain(); lfo2.frequency.value = 0.07; prof2.gain.value = 0.05; lfo2.connect(prof2).connect(bordon.gain); lfo2.start();
-  // viento del Llano
+  salida.gain.setValueAtTime(0, ctx.currentTime); salida.gain.linearRampToValueAtTime(1, ctx.currentTime + 4); // el ambiente entra despacio
+  // Brisa: ruido suave filtrado, con ráfagas lentas
   const v = ctx.createBufferSource(); v.buffer = ruido(); v.loop = true;
-  const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 650; bp.Q.value = 0.8;
-  const vg = ctx.createGain(); vg.gain.value = 0.05;
-  const lfo3 = ctx.createOscillator(), prof3 = ctx.createGain(); lfo3.frequency.value = 0.031; prof3.gain.value = 380; lfo3.connect(prof3).connect(bp.frequency); lfo3.start();
-  v.connect(bp).connect(vg).connect(salida); v.start();
+  const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 520; bp.Q.value = 0.5;
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1800;
+  const vg = ctx.createGain(); vg.gain.value = 0.07;
+  const lfo = ctx.createOscillator(), prof = ctx.createGain(); lfo.frequency.value = 0.06; prof.gain.value = 300; lfo.connect(prof).connect(bp.frequency); lfo.start();
+  const lfo2 = ctx.createOscillator(), prof2 = ctx.createGain(); lfo2.frequency.value = 0.09; prof2.gain.value = 0.035; lfo2.connect(prof2).connect(vg.gain); lfo2.start();
+  v.connect(bp).connect(lp).connect(vg).connect(salida); v.start();
   return salida;
 }
 
-// Tic-tac sincronizado con el segundero del reloj 3D (que salta en cada segundo entero)
-function iniciarTics() {
-  let proximo = Math.ceil(performance.now() / 1000), par = false;
-  tics = setInterval(() => {
-    if (!activo || document.hidden || ctx.state !== "running") { proximo = Math.ceil(performance.now() / 1000); return; } // en pausa no se acumulan tics
-    const ahora = performance.now() / 1000;
-    while (proximo < ahora + 0.3) {
-      if (proximo > ahora) clic(ctx.currentTime + (proximo - ahora), par ? 1900 : 2500, 0.05);
-      proximo += 1; par = !par;
-    }
-  }, 120);
+// Aves llaneras (sintetizadas): un canto distinto cada pocos segundos, en un lado u otro del paisaje
+function silbo(t, f0, f1, dur, g, pan) {
+  const o = ctx.createOscillator(), v = ctx.createGain(); o.type = "sine";
+  o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(g, t + dur * 0.15); v.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  let fin = v; if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; v.connect(p); fin = p; }
+  o.connect(v); fin.connect(ambiente || master); o.start(t); o.stop(t + dur + 0.02);
 }
-function clic(t, f, g) {
-  const s = ctx.createBufferSource(); s.buffer = ruido("blanco");
-  const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = 9;
-  const v = ctx.createGain(); v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(g, t + 0.002); v.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
-  s.connect(bp).connect(v).connect(master); s.start(t, Math.random()); s.stop(t + 0.08);
-}
-
-// Grillos de la sabana: chirridos breves, lejanos y al azar
-function iniciarGrillos() {
+const CANTOS = [
+  // gritos dobles y repetidos, como el alcaraván en la sabana
+  (t, pan) => { for (let i = 0; i < 4; i++) { const a = t + i * 0.32; silbo(a, 1250, 1750, 0.12, 0.05, pan); silbo(a + 0.14, 1700, 1150, 0.14, 0.045, pan); } },
+  // trino de pajarito: notas cortas que bajan
+  (t, pan) => { const n = 6 + Math.floor(Math.random() * 6); for (let i = 0; i < n; i++) silbo(t + i * 0.07, 4200 - i * 120, 3300 - i * 100, 0.05, 0.022, pan); },
+  // arrullo de paloma, grave y lejano
+  (t, pan) => { [0, 0.55, 0.85].forEach((d, i) => silbo(t + d, 560, i === 0 ? 470 : 500, i === 0 ? 0.45 : 0.28, 0.05, pan)); },
+  // silbido largo que sube, como un llamado entre el monte
+  (t, pan) => { silbo(t, 2100, 2900, 0.35, 0.028, pan); silbo(t + 0.45, 2100, 3100, 0.4, 0.024, pan); }
+];
+function iniciarAves() {
   const cantar = () => {
-    grillos = setTimeout(cantar, 1800 + Math.random() * 4200);
+    aves = setTimeout(cantar, 3500 + Math.random() * 6500);
     if (!activo || document.hidden || ctx.state !== "running") return;
-    const t = ctx.currentTime + 0.05, f = 4200 + Math.random() * 700, pulsos = 2 + Math.floor(Math.random() * 3);
-    const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null; if (pan) pan.pan.value = Math.random() * 1.6 - 0.8;
-    const v = ctx.createGain(); v.gain.value = 0;
-    const o = ctx.createOscillator(); o.frequency.value = f; o.connect(v);
-    if (pan) v.connect(pan).connect(master); else v.connect(master);
-    for (let i = 0; i < pulsos; i++) { const a = t + i * 0.07; v.gain.setValueAtTime(0, a); v.gain.linearRampToValueAtTime(0.006, a + 0.012); v.gain.linearRampToValueAtTime(0, a + 0.045); }
-    o.start(t); o.stop(t + pulsos * 0.07 + 0.05);
+    CANTOS[Math.floor(Math.random() * CANTOS.length)](ctx.currentTime + 0.05, Math.random() * 1.6 - 0.8);
   };
-  grillos = setTimeout(cantar, 2500);
+  aves = setTimeout(cantar, 1800);
 }
 
 // Arpa (síntesis Karplus-Strong): una cuerda pulsada, generada una vez por nota
@@ -138,7 +122,7 @@ export const sonido = {
       const despertar = () => { if (!activo) return; ctx.resume().then(() => { if (ctx.state === "running") gestos.forEach(g => removeEventListener(g, despertar, true)); }); };
       gestos.forEach(g => addEventListener(g, despertar, true));
     }
-    if (!ambiente) { ambiente = crearAmbiente(); iniciarTics(); iniciarGrillos(); }
+    if (!ambiente) { ambiente = crearAmbiente(); iniciarAves(); }
     activo = true;
     master.gain.cancelScheduledValues(ctx.currentTime);
     master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
@@ -146,19 +130,11 @@ export const sonido = {
     document.documentElement.classList.add("con-sonido");
   },
 
-  // Cruce de puerta: soplo que acelera con las estrellas (dura lo mismo que la transición)
+  // Cruce de puerta: un glissando de arpa que sube mientras se abre el portal
   viaje(duracion = 1.2) {
     if (!activo) return;
-    const t = ctx.currentTime, s = ctx.createBufferSource(); s.buffer = ruido(); s.loop = true;
-    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 1.4;
-    bp.frequency.setValueAtTime(160, t); bp.frequency.exponentialRampToValueAtTime(2600, t + duracion * 0.75); bp.frequency.exponentialRampToValueAtTime(500, t + duracion * 1.4);
-    const v = ctx.createGain(); v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(0.5, t + duracion * 0.7); v.gain.exponentialRampToValueAtTime(0.0001, t + duracion * 1.5);
-    s.connect(bp).connect(v).connect(master); s.start(t); s.stop(t + duracion * 1.6);
-    // tono que sube por debajo del soplo
-    const o = ctx.createOscillator(), og = ctx.createGain(); o.type = "sine";
-    o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(440, t + duracion);
-    og.gain.setValueAtTime(0, t); og.gain.linearRampToValueAtTime(0.05, t + duracion * 0.6); og.gain.linearRampToValueAtTime(0, t + duracion * 1.1);
-    o.connect(og).connect(master); o.start(t); o.stop(t + duracion * 1.2);
+    const t = ctx.currentTime + 0.02, pasos = [1, 1.125, 1.25, 1.5, 1.6875, 2, 2.25, 2.5], paso = Math.min(0.09, duracion * 0.6 / pasos.length);
+    pasos.forEach((k, i) => pulsar(NOTAS[0] * k, t + i * paso, 0.1, -0.5 + i * 0.14));
   },
 
   // Llegada a un capítulo: arpegio de arpa que sube desde la nota de su hora
@@ -171,6 +147,6 @@ export const sonido = {
   // Al pasar sobre una puerta: una sola cuerda, muy suave
   nota(n = 0) { if (activo) pulsar(nota(n) * 2, ctx.currentTime + 0.01, 0.07, (n - 3) * 0.15); },
 
-  // Al presionar un botón: un tic de madera
-  toque() { if (activo) clic(ctx.currentTime + 0.005, 1400, 0.12); }
+  // Al presionar un botón: sin sonido (solo arpa y Llano)
+  toque() {}
 };

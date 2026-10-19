@@ -53,15 +53,14 @@ const alSalir = f => limpiar.push(f);
 
 const PAGES = [
   { id: "inicio", n: "—", label: "Inicio" },
-  { id: "nosotros", n: "I", label: "Quiénes somos", kicker: "Institución", blurb: "Misión, visión y objetivos de la Corporación." },
-  { id: "tribuna", n: "II", label: "Tribuna de la Memoria", kicker: "Opinión", blurb: "Columnas de opinión sobre el Llano y su historia." },
-  { id: "monumentos", n: "III", label: "Salón de monumentos", kicker: () => C.monumentos.length + " piezas", blurb: "Recorre uno a uno los monumentos de Tame." },
-  { id: "historia", n: "IV", label: "Línea temporal", kicker: () => C.hitos.length ? parseInt(C.hitos[0].anio, 10) + "–" + parseInt(C.hitos[C.hitos.length - 1].anio, 10) : "Historia", blurb: "Los hitos de Tame, de la misión a la libertad." },
-  { id: "publicaciones", n: "V", label: "Publicaciones", kicker: "Biblioteca", blurb: "Libros que leen el territorio." },
-  { id: "aportar", n: "VI", label: "Aporte ciudadano", kicker: "Participa", blurb: "Suma tu recuerdo al archivo." }
+  { id: "nosotros", n: "I", label: "Quiénes somos", blurb: "Misión, visión y objetivos de la Corporación." },
+  { id: "tribuna", n: "II", label: "Tribuna de la Memoria", blurb: "Columnas de opinión sobre el Llano y su historia." },
+  { id: "monumentos", n: "III", label: "Salón de monumentos", blurb: "Recorre uno a uno los monumentos de Tame." },
+  { id: "historia", n: "IV", label: "Línea temporal", blurb: "Los hitos de Tame, de la misión a la libertad." },
+  { id: "publicaciones", n: "V", label: "Publicaciones", blurb: "Libros que leen el territorio." },
+  { id: "aportar", n: "VI", label: "Aporte ciudadano", blurb: "Suma tu recuerdo al archivo." }
 ];
-const kicker = p => typeof p.kicker === "function" ? p.kicker() : p.kicker;
-const vacio = (cap, titulo) => `<section class="seccion"><p class="antetitulo">${cap}</p><h1 class="titulo">${titulo}</h1><p class="lead" style="margin-top:24px">Pronto publicaremos contenido en esta sección.</p></section>`;
+const vacio = titulo => `<section class="seccion"><h1 class="titulo">${titulo}</h1><p class="lead" style="margin-top:24px">Pronto publicaremos contenido en esta sección.</p></section>`;
 
 /* 2 · CAPÍTULOS ---------------------------------------------- */
 const V = {}, M = {}; // V = HTML de cada capítulo · M = comportamiento al montarlo
@@ -95,7 +94,6 @@ V.inicio = () => {
           </span>
           <span class="puerta-num" aria-hidden="true">${p.n}</span>
           <span class="puerta-t"><span class="sr">Capítulo ${p.n}: </span>${p.label}</span>
-          <span class="puerta-k">${esc(kicker(p))}</span>
         </button>
       </li>`).join("")}
     </ol>
@@ -115,7 +113,6 @@ M.inicio = () => {
 V.nosotros = () => `
   <section class="seccion nosotros" data-screen-label="I · Quiénes somos">
     <div class="nosotros-in">
-      <p class="antetitulo" data-rv>Capítulo I · Quiénes somos</p>
       <h1 class="titulo" data-mask>Un lugar para <em>volver a mirar.</em></h1>
       <p class="intro" data-rv>${esc(A.nosotros_intro)}</p>
       <div class="pilares">${[["I", "Misión", A.mision], ["II", "Visión", A.vision], ["III", "Valores", A.valores]].map(([n, t, d]) => `
@@ -132,7 +129,7 @@ V.nosotros = () => `
 let colI = 0;
 V.tribuna = () => {
   const cols = C.columnas;
-  if (!cols.length) return vacio("Capítulo II · Columna de opinión", "Tribuna de la Memoria");
+  if (!cols.length) return vacio("Tribuna de la Memoria");
   colI = Math.min(colI, cols.length - 1);
   return `
   <section class="seccion" data-screen-label="II · Tribuna">
@@ -189,7 +186,7 @@ const MON_MS = 7000;
 let monI = 0, monPausa = false;
 V.monumentos = () => {
   const L = C.monumentos;
-  if (!L.length) return vacio("Capítulo III · Salón de monumentos", "Salón de monumentos");
+  if (!L.length) return vacio("Salón de monumentos");
   monI = Math.min(monI, L.length - 1);
   return `
   <section class="monumentos" id="mon" data-screen-label="III · Monumentos">
@@ -199,7 +196,7 @@ V.monumentos = () => {
       <img class="foto" src="${esc(m.imagen)}" alt="${esc(m.alt || m.titulo)}" loading="${i < 2 ? "eager" : "lazy"}">
     </div>`).join("")}
     <div class="mon-arriba">
-      <div><span class="antetitulo">Capítulo III · Salón de monumentos</span><button type="button" class="btn-linea" id="mon-auto"></button></div>
+      <div><button type="button" class="btn-linea" id="mon-auto"></button></div>
       <div class="mon-segs" aria-hidden="true">${L.map(() => "<span><i></i></span>").join("")}</div>
     </div>
     <div class="mon-abajo">
@@ -247,7 +244,7 @@ let tlI = 0;
 const anioNum = h => parseInt(h.anio, 10);
 V.historia = () => {
   const T = C.hitos;
-  if (!T.length) return vacio("Capítulo IV · Línea temporal", "Línea temporal");
+  if (!T.length) return vacio("Línea temporal");
   tlI = Math.min(tlI, T.length - 1);
   const a0 = anioNum(T[0]), a1 = anioNum(T[T.length - 1]), span = Math.max(1, a1 - a0);
   const izq = y => ((y - a0) / span * 100).toFixed(2) + "%";
@@ -256,7 +253,6 @@ V.historia = () => {
   marcas.push(a1);
   return `
   <section class="seccion historia" data-screen-label="IV · Línea temporal">
-    <p class="antetitulo" data-rv>Capítulo IV · Línea temporal ${a0}–${a1}</p>
     <h1 class="titulo" data-mask>${enPalabras(T.length)} hitos entre la misión y la <em>libertad.</em></h1>
     <div class="tl-eje" id="tl-eje">
       <span class="tl-base"></span><span class="tl-oro" id="tl-oro"></span><span class="tl-destello" id="tl-dest" aria-hidden="true"></span>
@@ -314,12 +310,12 @@ let libI = 0;
 const proporciones = {};
 V.publicaciones = () => {
   const P = C.publicaciones;
-  if (!P.length) return vacio("Capítulo V · Publicaciones", "El territorio también se lee.");
+  if (!P.length) return vacio("El territorio también se lee.");
   libI = Math.min(libI, P.length - 1);
   return `
   <section class="seccion" data-screen-label="V · Publicaciones">
     <div class="cabecera">
-      <div><p class="antetitulo" data-rv>Capítulo V · Publicaciones</p><h1 class="titulo" data-mask>El territorio <em style="color:var(--perla)">también se lee.</em></h1></div>
+      <div><h1 class="titulo" data-mask>El territorio <em style="color:var(--perla)">también se lee.</em></h1></div>
       <div class="pestanas" data-rv role="tablist" aria-label="Libros">${P.map((b, i) => `<button type="button" role="tab" class="pestana tilt" data-lib="${i}"><span class="pestana-tapa" aria-hidden="true">${b.portada ? `<img src="${esc(b.portada)}" alt="" loading="lazy">` : ""}</span><span class="pestana-txt"><span class="pestana-tit">${esc(b.titulo)}${b.volumen ? " · " + esc(b.volumen) : ""}</span>${b.tipo ? `<span class="pestana-tipo">${esc(b.tipo)}</span>` : ""}</span></button>`).join("")}</div>
     </div>
     <div class="libro-caja vidrio" data-rv>
@@ -408,7 +404,6 @@ M.publicaciones = () => {
 // ── VI · Aporte ciudadano ──
 V.aportar = () => `
   <section class="seccion aportar" data-screen-label="VI · Aporte ciudadano">
-    <p class="antetitulo" data-rv>Capítulo VI · Aporte ciudadano</p>
     <h1 class="titulo" data-mask>Tu recuerdo<br><em>es historia.</em></h1>
     <div class="aporte-fila">
       <div class="aporte-info vidrio" data-rv>
@@ -480,7 +475,7 @@ function marcarNav() {
   $$("[data-nav]").forEach(b => b.setAttribute("aria-current", b.dataset.nav === S.page));
   const i = PAGES.findIndex(p => p.id === S.page), j = (i + 1) % PAGES.length, sig = PAGES[j], btn = $("#siguiente");
   btn.dataset.ir = sig.id;
-  $("#sig-k").textContent = sig.id === "inicio" ? "Fin del recorrido · Regreso" : "Siguiente destino · Capítulo " + sig.n;
+  $("#sig-k").textContent = sig.id === "inicio" ? "Fin del recorrido" : "Siguiente destino";
   const b = $("#sig-t");
   b.textContent = sig.id === "inicio" ? "Volver al inicio" : sig.label;
   delete b.dataset.mk; b.classList.remove("visto");
