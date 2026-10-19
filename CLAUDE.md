@@ -12,8 +12,13 @@ Publicado en: https://nicolasperzalf.github.io/CorporacionTame-HistoriayCultura/
 - Imágenes en `assets/` sin subcarpetas y con nombres sin espacios ni tildes.
 
 ## Estructura
-- `index.html` — estructura pública. `css/styles.css` — estilos (variables en `:root`).
-- `js/app.js` — capítulos (`PAGES`), navegación `#/id` con transición, libros 3D (Cap. V), formulario (Cap. VI).
+- `index.html` — estructura pública. `css/styles.css` — estilos (variables en `:root`). `css/movimiento.css` — todo el movimiento (revelados, luz, túnel, portal, carga, sonido, `prefers-reduced-motion`).
+- `js/app.js` — capítulos (`PAGES`), navegación `#/id`, libros 3D (Cap. V), formulario (Cap. VI) y arranque.
+- `js/movimiento.js` — motor de movimiento compartido: `TIEMPOS`/`CURVA`, `revelar` (máscaras y trazos encadenados), luz de borde que sigue el cursor con chispas (`.luz`), `animarPuertas` (túnel que acelera), `atravesar` (portal que crece desde lo pulsado y une la salida de un capítulo con la entrada del siguiente).
+- `js/precarga.js` — pantalla de carga SIN textos: aro-reloj con el logo, años 1629→2029 y friso de línea (caney, canoa, conuco, morichal) que se dibuja según el avance real; al final, aviso de que el sitio tiene sonido y puerta «Entrar con sonido / en silencio».
+- `js/sonido.js` — sonido sintetizado (Web Audio, sin archivos): fondo de Llano abierto (brisa y cantos de aves) y arpa llanera al cruzar y llegar. Sin tic-tac, grillos ni bordón. Solo con permiso; se recuerda en `localStorage` (`tame-sonido`).
+- `js/iconos.js` — íconos de línea por capítulo (se dibujan solos) y los relojes de los botones.
+- Cloudflare: `wrangler.jsonc` (vistas previas de ramas), `_headers` (seguridad y caché), `.assetsignore` (lo que no se publica).
 - `js/escena3d.js` — fondo three.js (three@0.184.0 por import dinámico): estrellas warp + reloj de bolsillo dorado; el logotipo es la esfera; las manecillas marcan la hora del capítulo (Inicio = XII, I…VI).
 - `js/datos.js` — lee Supabase; si falla usa `js/contenido-local.js`. Publicaciones: si la tabla no tiene la columna `lomo`, usa los libros locales.
 - `admin/` — panel (Supabase Auth). Campos de cada sección en `admin/admin.js`.
@@ -26,7 +31,12 @@ Publicado en: https://nicolasperzalf.github.io/CorporacionTame-HistoriayCultura/
 - Precarga: el contador va de 1629 (fundación de La Palma de Espinosa) a 2029 (Tame, 400 años).
 - Nombre: "Corporación Tame, Historia y Cultura". Conservar el logotipo (`assets/logo.jpeg`).
 - Fondo #0B0E14 / #050505, oro #C5A059 / #8B6B3D, perla #F3EFE7. Bandera: verde #2f7a45, rojo #b3322b.
-- Tipos: Lora (titulares, más legible), Cinzel (numerales), Space Grotesk (UI, ≥12px).
+- Tipos: Ibarra Real Nova (titulares y numerales; imprenta española del s. XVIII), Schibsted Grotesk (UI, ≥12px). Cuadros/placas: Cormorant Garamond (títulos) y Marcellus (números).
+- Cuadros (`.vidrio`) = placas de archivo con esquinas cortadas (clip-path), sin desenfoque de fondo (rendimiento).
+- Sin rótulos «Capítulo X · Nombre» en las secciones ni en el portal (solo ícono y numeral).
+- Movimiento: capítulos = «puertas del tiempo» (arco de misión con túnel); botones principales (`.btn-oro`, `.btn-vidrio`) = relojes de bolsillo redondos (asa, corona, esfera con marcas y aguja), con luz de borde que sigue el cursor; «Siguiente destino» = placa de esquinas cortadas con una esfera cuya aguja avanza a la hora del próximo capítulo. Sin franja de fechas, sin cursor personalizado.
+- Puertas: la I (Quiénes somos) lleva el logotipo; la VI (Aporte ciudadano) lleva el ícono de líneas que antes tenía la I.
+- Friso de carga: basado en Rivero y Gumilla y en el informe `investigacion/reports/Pueblos indígenas de Tame siglo XVII.md` de la carpeta del proyecto. Sin penachos, flautas sagradas ni imágenes de los U'wa; los pueblos siguen vivos (makaguán, hitnü, sikuani).
 - Tono: serio, territorial, respetuoso con la memoria local. Sin emojis.
 - 6 capítulos: I Quiénes somos · II Tribuna de la Memoria · III Salón de monumentos · IV Línea temporal · V Publicaciones · VI Aporte ciudadano.
 

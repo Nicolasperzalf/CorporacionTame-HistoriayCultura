@@ -1,0 +1,16 @@
+# Cabeceras que Cloudflare añade a cada respuesta (lo lee Cloudflare al publicar; GitHub Pages lo ignora).
+
+# Seguridad básica para todo el sitio
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-Frame-Options: SAMEORIGIN
+
+# Imágenes: se guardan un día en el navegador y se renuevan en segundo plano
+/assets/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# El panel no debe aparecer en buscadores
+/admin/*
+  X-Robots-Tag: noindex, nofollow

@@ -1,0 +1,201 @@
+/* ==========================================================
+   Movimiento — todo lo que se anima en el sitio
+   Usa las curvas de css/styles.css (--sale: entradas, --mueve:
+   desplazamientos) y los mismos tiempos de js/movimiento.js.
+   Índice: 1 Revelados · 2 Luz que sigue el cursor · 3 Relojes
+           4 Túnel y puertas · 5 Íconos vivos · 6 Portal
+           7 Pantalla de carga · 8 Sonido · 9 Movimiento reducido
+   ========================================================== */
+
+/* 1 · REVELADOS ---------------------------------------------- */
+@keyframes pulso { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(2.8); opacity: 0; } }
+@keyframes brillo { from { background-position: 0 0; } to { background-position: -200% 0; } }
+@keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+@keyframes girar { to { transform: rotate(360deg); } }
+/* Aparición al entrar en pantalla (encadenada desde js/movimiento.js con --d0) */
+[data-rv] { transition: opacity 1s ease var(--d0, 0ms), translate 1.3s var(--sale) var(--d0, 0ms), filter 1s ease var(--d0, 0ms); }
+[data-rv].oculto { opacity: 0; translate: 0 48px; }
+@media (pointer: coarse) { [data-rv].oculto { filter: none; translate: 0 32px; } }
+/* Máscara: cada palabra sube desde detrás de su propia ventana */
+.mk { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .08em .14em 0; margin: 0 -.08em -.14em 0; }
+.mk-i { display: inline-block; transform: translateY(112%) rotate(5deg); transform-origin: 0 100%; transition: transform 1.15s var(--sale); transition-delay: calc(var(--d0, 0ms) + var(--i, 0) * 55ms); }
+.visto .mk-i, .visto.mk-i { transform: none; }
+/* Autodibujo: cada trazo (pathLength = 1) se dibuja en orden (--k) cuando el SVG entra en pantalla */
+[data-dibujo] { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+[data-dibujo] path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.3s var(--sale); transition-delay: calc(var(--d0, 0ms) + 200ms + var(--k, 0) * 110ms); }
+[data-dibujo].visto path { stroke-dashoffset: 0; }
+/* Celular: al leer, el reloj 3D se atenúa para que el texto quede limpio */
+@media (max-width: 899px) { #espacio { transition: opacity .8s ease; } body.leyendo #espacio { opacity: .32; } }
+
+/* 2 · LUZ QUE SIGUE EL CURSOR -------------------------------- */
+/* js/movimiento.js escribe --ang (dónde está el cursor, 0° = arriba) y --luz (0 lejos, 1 encima).
+   ::before es el filo de luz sobre el borde; ::after, el halo difuso alrededor. */
+@property --ang { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+.luz { --luz: 0; }
+.luz::before, .luz::after { content: ""; position: absolute; pointer-events: none; border-radius: inherit; background: conic-gradient(from calc(var(--ang) - 75deg), transparent 0deg, rgba(197, 160, 89, .25) 35deg, #FFF1CF 75deg, rgba(197, 160, 89, .25) 115deg, transparent 150deg); opacity: var(--luz); }
+.luz::before { inset: 0; z-index: 3; padding: 1.5px; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.luz::after { inset: -12px; z-index: -1; filter: blur(16px); opacity: calc(var(--luz) * .55); }
+/* Pantallas táctiles: la luz recorre el borde sola, como un segundero (cada puerta a su hora) */
+@media (hover: none) {
+  .luz:is(.btn-oro, .siguiente, .puerta) { --luz: .6; animation: segundero 7s linear infinite; }
+  .luz.puerta { --luz: .4; animation-duration: 12s; animation-delay: calc(var(--h, 0) * -2s); }
+  .luz::after { display: none; }
+}
+@keyframes segundero { from { --ang: 0deg; } to { --ang: 360deg; } }
+#chispas { position: fixed; inset: 0; z-index: 95; width: 100vw; height: 100vh; pointer-events: none; }
+
+/* 3 · RELOJES ------------------------------------------------- */
+/* La manecilla-flecha da una vuelta al pasar el cursor y vuelve hacia atrás al salir (rebobina) */
+.reloj .r-aguja { transition: rotate .9s var(--mueve); }
+.reloj .r-marcas { transition: opacity .4s; }
+@media (hover: hover) {
+  :is(a, button):hover .reloj .r-aguja { rotate: calc(var(--dir, 90deg) + 360deg); }
+  :is(a, button):hover .reloj .r-marcas { opacity: 1; }
+}
+/* Reloj del siguiente capítulo: la manecilla de la hora avanza a la próxima hora cuando aparece */
+.sd-hora { transition: rotate 1.6s var(--mueve) .5s; }
+.sd-min { transition: rotate 2.2s var(--mueve) .3s; }
+.sig-dial.visto .sd-hora { rotate: var(--h1); }
+.sig-dial.visto .sd-min { rotate: 360deg; }
+.sig-dial text.prox { animation: latido 1.8s ease-in-out infinite; }
+@keyframes latido { 50% { opacity: .35; } }
+@media (hover: hover) {
+  .siguiente:hover .sd-min { rotate: 720deg; transition-duration: 1.4s; transition-delay: 0s; }
+}
+
+/* 4 · TÚNEL Y PUERTAS ----------------------------------------- */
+/* Arcos que avanzan hacia ti sin fin. La escala sigue la perspectiva (1/distancia):
+   lejos casi no se mueven, cerca pasan rápido. El JS cambia la velocidad (playbackRate). */
+.anillo { position: absolute; inset: 0; border-radius: inherit; border: 1.5px solid rgba(226, 196, 138, .7); transform-origin: 50% 64%; opacity: 0; animation: tunel 7.2s linear infinite; will-change: transform, opacity; }
+.anillo:nth-child(2) { animation-delay: -1.2s; } .anillo:nth-child(3) { animation-delay: -2.4s; } .anillo:nth-child(4) { animation-delay: -3.6s; }
+.anillo:nth-child(5) { animation-delay: -4.8s; } .anillo:nth-child(6) { animation-delay: -6s; }
+@keyframes tunel {
+  0% { transform: scale(.08); opacity: 0; }
+  12% { opacity: .85; }
+  40% { transform: scale(.18); }
+  70% { transform: scale(.38); }
+  88% { transform: scale(.7); opacity: .7; }
+  100% { transform: scale(1.1); opacity: 0; }
+}
+.quieta .anillo { animation-play-state: paused; }
+.puerta-vano::after { content: ""; position: absolute; left: 50%; top: 64%; width: 40%; aspect-ratio: 1; border-radius: 50%; translate: -50% -50%; background: radial-gradient(circle, rgba(255, 241, 207, .35), transparent 70%); opacity: .5; transition: opacity .6s, scale .8s var(--sale); }
+@media (hover: hover) { .puerta:hover .puerta-vano::after { opacity: 1; scale: 1.8; } }
+
+/* 5 · ÍCONOS VIVOS (al pasar el cursor por su puerta o por el menú) --------------- */
+:is(.puerta, #menu button) .ico * { transform-box: fill-box; transform-origin: center; }
+@media (hover: hover) {
+  :is(.puerta, #menu button):hover .i-cab { animation: asentir 1s var(--sale); }
+  :is(.puerta, #menu button):hover .i-lado { animation: asentir 1s var(--sale) .12s; }
+  :is(.puerta, #menu button):hover .i-lado2 { animation: asentir 1s var(--sale) .24s; }
+  :is(.puerta, #menu button):hover .i-pluma { animation: escribir 1.4s var(--mueve); }
+  :is(.puerta, #menu button):hover .i-escritura { animation: trazo 1.4s var(--mueve); }
+  :is(.puerta, #menu button):hover .i-halo { animation: halo 1.6s var(--sale); }
+  :is(.puerta, #menu button):hover .i-reloj-arena { animation: voltear 1.1s var(--mueve); transform-origin: 50% 50%; }
+  :is(.puerta, #menu button):hover .i-hoja { animation: hoja 1.2s var(--mueve); transform-origin: 0% 50%; }
+  :is(.puerta, #menu button):hover .i-foto { animation: enderezar 1s var(--sale); }
+}
+@keyframes asentir { 40% { translate: 0 -2.5px; } }
+@keyframes escribir { 30% { translate: -3px 2px; rotate: -6deg; } 60% { translate: 3px 1px; rotate: 4deg; } }
+@keyframes trazo { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes halo { from { stroke-dashoffset: 1; opacity: 1; } 60% { stroke-dashoffset: 0; } to { stroke-dashoffset: 0; } }
+@keyframes voltear { to { rotate: 180deg; } }
+@keyframes hoja { 50% { scale: -1 1; } 100% { scale: 1 1; } }
+@keyframes enderezar { 40% { rotate: -6deg; translate: 0 -2px; } }
+
+/* 6 · PORTAL ENTRE CAPÍTULOS ---------------------------------- */
+/* js/movimiento.js → atravesar(): el recorte (clip-path) crece desde el elemento tocado. */
+#portal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; overflow: hidden; pointer-events: none; background: radial-gradient(circle at 50% 50%, rgba(197, 160, 89, .2), rgba(9, 11, 17, .9) 42%, rgba(5, 5, 5, .97) 78%); }
+.portal-tunel { position: absolute; left: 50%; top: 50%; width: min(64vmin, 460px); aspect-ratio: 5 / 7; translate: -50% -50%; border-radius: 999px 999px 4px 4px; }
+.portal-tunel i { position: absolute; inset: 0; border-radius: inherit; border: 1px solid rgba(226, 196, 138, .7); transform-origin: 50% 50%; opacity: 0; animation: tunel-portal 2.1s linear infinite; }
+.portal-tunel i:nth-child(2) { animation-delay: -.3s; } .portal-tunel i:nth-child(3) { animation-delay: -.6s; } .portal-tunel i:nth-child(4) { animation-delay: -.9s; }
+.portal-tunel i:nth-child(5) { animation-delay: -1.2s; } .portal-tunel i:nth-child(6) { animation-delay: -1.5s; } .portal-tunel i:nth-child(7) { animation-delay: -1.8s; }
+@keyframes tunel-portal {
+  0% { transform: scale(.05); opacity: 0; }
+  20% { opacity: .9; }
+  60% { transform: scale(.16); }
+  85% { transform: scale(.6); }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+.portal-txt { position: relative; display: grid; justify-items: center; gap: 8px; padding: 0 24px; text-align: center; }
+.portal-ico { width: 64px; color: var(--oro-claro); filter: drop-shadow(0 0 14px rgba(197, 160, 89, .6)); }
+.portal-ico svg { display: block; width: 100%; height: auto; }
+.portal-ico [data-dibujo] path { transition-delay: calc(120ms + var(--k, 0) * 70ms); transition-duration: .9s; }
+.portal-k, .portal-t { display: none; } /* el portal solo muestra ícono y numeral */
+.portal-k { font-size: 12px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: var(--oro); }
+.portal-n { font-family: var(--f-numeral); font-weight: 600; font-size: clamp(72px, 12vw, 150px); line-height: .95; letter-spacing: .04em; color: var(--oro); text-shadow: 0 0 60px rgba(197, 160, 89, .45); }
+.portal-t { font-family: var(--f-titulo); font-weight: 500; font-size: clamp(32px, 5vw, 72px); line-height: 1.06; text-wrap: balance; }
+.portal-t .mk-i { transition-delay: calc(.28s + var(--i, 0) * 50ms); }
+.portal-k, .portal-n { opacity: 0; translate: 0 26px; transition: opacity .5s ease, translate .9s var(--sale); }
+.portal-n { transition-delay: .1s; }
+#portal.abierto .portal-k, #portal.abierto .portal-n { opacity: 1; translate: none; }
+
+/* 7 · PANTALLA DE CARGA --------------------------------------- */
+#precarga { position: fixed; inset: 0; z-index: 100; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; padding-bottom: env(safe-area-inset-bottom); background: radial-gradient(1px 1px at 12% 18%, rgba(243, 239, 231, .6), transparent), radial-gradient(1px 1px at 82% 12%, rgba(243, 239, 231, .5), transparent), radial-gradient(1px 1px at 64% 32%, rgba(243, 239, 231, .45), transparent), radial-gradient(1px 1px at 28% 44%, rgba(243, 239, 231, .4), transparent), radial-gradient(1.5px 1.5px at 90% 48%, rgba(226, 196, 138, .55), transparent), radial-gradient(120% 80% at 50% 28%, #0f1422 0%, var(--fondo) 62%); overflow: hidden; transition: opacity 1.1s ease .4s; }
+.pre-centro { align-self: center; display: grid; justify-items: center; gap: 0; padding: clamp(20px, 5vh, 48px) 20px 8px; text-align: center; transition: transform 1.4s cubic-bezier(.7, 0, .84, 0), opacity 1s ease .25s; }
+.pre-aro { position: relative; width: clamp(150px, 24vh, 230px); aspect-ratio: 1; display: grid; place-items: center; }
+.pre-aro svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.aro-fondo { fill: none; stroke: rgba(197, 160, 89, .16); stroke-width: 1; }
+.aro-interior { fill: none; stroke: rgba(197, 160, 89, .12); stroke-width: 1; }
+.aro-avance { fill: none; stroke: var(--oro-claro); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; transform: rotate(-90deg); transform-origin: 150px 150px; filter: drop-shadow(0 0 6px rgba(197, 160, 89, .7)); }
+.marca { fill: rgba(197, 160, 89, .22); transform-box: fill-box; transform-origin: center; transition: fill .4s, scale .6s cubic-bezier(.34, 1.56, .64, 1); }
+.marca.on { fill: var(--oro-claro); scale: 1.45; }
+.pre-img { width: 72%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 1px rgba(197, 160, 89, .35), 0 20px 50px -20px rgba(0, 0, 0, .9); }
+.pre-img img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.14); }
+.pre-anio { margin: clamp(14px, 2.4vh, 24px) 0 0; font-family: var(--f-numeral); font-weight: 600; font-size: clamp(46px, 8vh, 78px); line-height: 1; letter-spacing: .04em; font-variant-numeric: lining-nums tabular-nums; background: linear-gradient(180deg, #F6E7C4, var(--oro) 70%, var(--bronce)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.pre-puerta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 18px; margin-top: 18px; animation: aparecer .8s ease; }
+.pre-puerta .btn-oro { display: inline-grid; gap: 6px; align-content: center; }
+.pre-puerta .btn-oro .btn-txt { max-width: 10ch; position: relative; z-index: 2; }
+.pre-puerta .btn-oro .reloj-son { position: relative; z-index: 2; width: 22px; height: 22px; }
+.pre-aviso { flex: 0 0 100%; margin: 0 0 6px; text-align: center; font-size: 14px; line-height: 1.5; color: var(--texto-2); text-wrap: balance; }
+.reloj-son { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: var(--oro); grid-area: auto !important; }
+.reloj-son svg { width: 20px; height: 20px; }
+.pre-puerta .btn-oro > .btn-txt { grid-area: auto; }
+.pre-friso-caja { position: relative; height: clamp(140px, 27vh, 290px); overflow: hidden; -webkit-mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); transition: opacity .8s ease, translate 1.2s var(--sale); }
+.pre-friso { display: block; height: 100%; width: auto; max-width: none; margin: 0 auto; overflow: visible; will-change: transform; }
+.pre-friso path { fill: none; stroke: var(--oro); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.pre-friso .cielo { stroke: rgba(197, 160, 89, .5); stroke-width: 2; }
+.pre-friso .agua { stroke: rgba(226, 196, 138, .75); }
+.pre-friso .malla { stroke-width: 1.6; }
+.pre-friso .remo, .pre-friso .arco { stroke: var(--oro-claro); }
+.pre-friso .pluma { fill: #FFF3D6; stroke: none; filter: drop-shadow(0 0 6px var(--oro-claro)) drop-shadow(0 0 14px rgba(197, 160, 89, .8)); transition: opacity .3s; }
+/* Salida: se entra por el logotipo (zoom) mientras el friso se hunde */
+#precarga.sale { opacity: 0; pointer-events: none; }
+#precarga.sale .pre-centro { transform: scale(7); opacity: 0; }
+#precarga.sale .pre-friso-caja { opacity: 0; translate: 0 40px; }
+/* En pantallas bajas el friso nunca debe tapar los botones de entrada */
+.pre-centro { position: relative; z-index: 1; }
+.pre-friso-caja { pointer-events: none; }
+
+/* Aplicación: entra con zoom después de la pantalla de carga */
+.app { opacity: 0; transform: scale(1.18); transform-origin: 50% 40vh; transition: opacity 1s ease .15s, transform 1.5s var(--curva), filter 1s ease .1s; }
+body.intro .app { opacity: 1; transform: none; filter: none; }
+.hero .pal > span { display: inline-block; transform: translateY(110%) rotate(5deg); transform-origin: 0 100%; transition: transform 1.4s var(--curva); }
+body.intro .hero .pal > span { transform: none; }
+.aparece { opacity: 0; transform: translateY(24px); transition: opacity 1s ease var(--d, 0s), transform 1.2s var(--curva) var(--d, 0s); }
+body.intro .aparece { opacity: 1; transform: none; }
+.hero-scroll span { animation: caer 2.2s var(--mueve) infinite; }
+@keyframes caer { from { transform: translateY(-100%); } to { transform: translateY(260%); } }
+
+/* 8 · SONIDO -------------------------------------------------- */
+.ondas .o-1, .ondas .o-2, .ondas .o-3 { transition: opacity .4s; }
+.ondas .o-corte { opacity: 0; transition: opacity .3s; }
+[aria-pressed="false"] .ondas :is(.o-2, .o-3) { opacity: .25; }
+[aria-pressed="false"] .ondas .o-corte { opacity: 1; }
+[aria-pressed="true"] .ondas :is(.o-1, .o-2, .o-3) { animation: onda 1.8s ease-in-out infinite; }
+[aria-pressed="true"] .ondas .o-2 { animation-delay: .2s; } [aria-pressed="true"] .ondas .o-3 { animation-delay: .4s; }
+@keyframes onda { 0%, 100% { opacity: .35; } 40% { opacity: 1; } }
+.reloj-son .ondas .o-corte { display: none; }
+.reloj-son .ondas :is(.o-1, .o-2, .o-3) { animation: onda 1.8s ease-in-out infinite; }
+.reloj-son .ondas .o-2 { animation-delay: .2s; } .reloj-son .ondas .o-3 { animation-delay: .4s; }
+
+/* 9 · MOVIMIENTO REDUCIDO ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation: none !important; }
+  .mk-i, .hero .pal > span { transform: none !important; }
+  [data-dibujo] path, .pre-friso path { stroke-dashoffset: 0 !important; }
+  .anillo { opacity: .25; }
+  .anillo:nth-child(1) { transform: scale(.85); } .anillo:nth-child(2) { transform: scale(.6); } .anillo:nth-child(3) { transform: scale(.38); }
+  .anillo:nth-child(4) { transform: scale(.22); } .anillo:nth-child(5) { transform: scale(.12); } .anillo:nth-child(6) { transform: scale(.06); }
+  .luz::before, .luz::after, #chispas { display: none; }
+  #progreso { display: none; }
+}

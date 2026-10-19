@@ -11,11 +11,18 @@ El contenido se edita desde **/admin**, así que no hace falta tocar código par
 sitio/
 ├── CLAUDE.md               Instrucciones para Claude Code
 ├── index.html              Página pública (estructura general)
+├── _headers                Cabeceras de seguridad y caché para Cloudflare
+├── wrangler.jsonc          Configuración de Cloudflare (vistas previas de ramas)
 ├── css/
-│   └── styles.css          Todos los estilos (colores y tipografías arriba, en :root)
+│   ├── styles.css          Estilos de la página (colores y tipografías arriba, en :root)
+│   └── movimiento.css      Todo lo que se mueve: revelados, luz de los botones, túnel, portal, pantalla de carga
 ├── js/
 │   ├── config.js           ← AQUÍ se pegan la URL y la clave de Supabase
-│   ├── app.js              Capítulos, navegación y efectos
+│   ├── app.js              Capítulos, navegación y arranque
+│   ├── movimiento.js       Motor de movimiento: revelados, luz que sigue el cursor, puertas y portal entre capítulos
+│   ├── precarga.js         Pantalla de carga: aro-reloj, años 1629 → 2029 y friso indígena que se dibuja solo
+│   ├── sonido.js           Sonido del viaje (se sintetiza en el navegador, sin archivos de audio)
+│   ├── iconos.js           Íconos de línea que se dibujan solos y relojes de los botones
 │   ├── datos.js            Lee la base de datos y envía los aportes
 │   ├── escena3d.js         Fondo espacial y reloj de bolsillo 3D con el logo
 │   └── contenido-local.js  Copia de respaldo del contenido (si la base no responde)

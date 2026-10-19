@@ -14,17 +14,20 @@ export const conectado = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 const BASE = (SUPABASE_URL || "").replace(/\/$/, "");
 const cab = extra => ({ apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, ...extra });
 
+// Si la base no responde en 8 s, se usa el contenido de respaldo (la pantalla de carga nunca se queda esperando)
+const corte = new AbortController();
 async function leer(tabla, orden) {
-  const r = await fetch(`${BASE}/rest/v1/${tabla}?select=*&publicado=eq.true&order=${orden}`, { headers: cab() });
+  const r = await fetch(`${BASE}/rest/v1/${tabla}?select=*&publicado=eq.true&order=${orden}`, { headers: cab(), signal: corte.signal });
   if (!r.ok) throw new Error(tabla + ": " + r.status);
   return r.json();
 }
 
 export async function cargarContenido() {
   if (!conectado) return limpiar(LOCAL);
+  const reloj = setTimeout(() => corte.abort(), 8000);
   try {
     const [aj, columnas, monumentos, hitos, publicaciones] = await Promise.all([
-      fetch(`${BASE}/rest/v1/ajustes?select=clave,valor`, { headers: cab() }).then(r => { if (!r.ok) throw new Error("ajustes"); return r.json(); }),
+      fetch(`${BASE}/rest/v1/ajustes?select=clave,valor`, { headers: cab(), signal: corte.signal }).then(r => { if (!r.ok) throw new Error("ajustes"); return r.json(); }),
       leer("columnas", "fecha.desc"),
       leer("monumentos", "orden.asc"),
       leer("hitos", "orden.asc"),
@@ -38,7 +41,7 @@ export async function cargarContenido() {
   } catch (e) {
     console.warn("No se pudo leer la base de datos; se usa el contenido de respaldo.", e);
     return limpiar(LOCAL);
-  }
+  } finally { clearTimeout(reloj); }
 }
 
 // Guarda un aporte (y su archivo) con estado "pendiente" para revisión en /admin.

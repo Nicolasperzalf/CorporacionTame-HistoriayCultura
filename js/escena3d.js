@@ -12,8 +12,9 @@ function pose(S, wide, aspect) {
   const narrowS = Math.min(0.9, Math.max(0.5, halfW / 2.4));
   if (S.page === "inicio") {
     const H = wide ? { xf: 0.5, yf: 0.12, z: 0, s: 1 } : { xf: 0, yf: 0.42, z: 0, s: narrowS };
-    const C = wide ? { xf: 0.3, yf: 0.05, z: -10, s: 1.7 } : { xf: 0, yf: 0.1, z: -12, s: 1.4 };
-    const p = easeOut(Math.min(1, scrollY / (innerHeight * 0.9)));
+    // al bajar a las puertas, el reloj se aleja a la esquina superior, como una luna lejana, para no tapar textos ni puertas
+    const C = wide ? { xf: 0.9, yf: 0.88, z: -75, s: 1.4 } : { xf: 0.74, yf: 0.9, z: -80, s: 1.4 };
+    const k = Math.min(1, scrollY / (innerHeight * 0.9)), p = S.reduce ? (k > 0.5 ? 1 : 0) : easeOut(k);
     const o = {}; for (const k in H) o[k] = H[k] + (C[k] - H[k]) * p; return o;
   }
   if (S.page === "nosotros") return wide ? { xf: 0.52, yf: 0.02, z: 0, s: 1.15 } : { xf: 0, yf: 0.3, z: -10, s: 1.1 };
@@ -28,7 +29,7 @@ export async function iniciarEscena(canvas, S, alListo) {
   catch (e) { alListo(); return; }
 
   const small = () => innerWidth < 700 || S.coarse;
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, small() ? 1.5 : 1.75));
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); // más nitidez no se nota y cuesta fluidez
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
@@ -76,12 +77,12 @@ export async function iniciarEscena(canvas, S, alListo) {
     g.fillStyle = "#1c1a16";
     for (let i = 0; i < 60; i++) { g.save(); g.rotate(i / 60 * Math.PI * 2); const big = i % 5 === 0; g.fillRect(big ? -3 : -1.5, -1.84 * U, big ? 6 : 3, (big ? 0.08 : 0.045) * U); g.restore(); }
     const N = ["XII", "I", "II", "III", "IIII", "V", "VI", "VII", "VIII", "IX", "X", "XI"];
-    g.textAlign = "center"; g.textBaseline = "middle"; g.font = "600 " + Math.round(0.15 * U) + "px Cinzel, 'Times New Roman', serif";
+    g.textAlign = "center"; g.textBaseline = "middle"; g.font = "600 " + Math.round(0.16 * U) + "px 'Ibarra Real Nova', 'Times New Roman', serif";
     N.forEach((n, i) => { g.save(); g.rotate(i / 12 * Math.PI * 2); g.translate(0, -1.7 * U); g.fillText(n, 0, 0); g.restore(); });
     g.restore(); ringTex.needsUpdate = true;
   };
   const ringTex = new THREE.CanvasTexture(cv); ringTex.colorSpace = THREE.SRGBColorSpace; ringTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  dial(); (document.fonts?.load("600 40px Cinzel") || Promise.resolve()).then(dial, () => {});
+  dial(); (document.fonts?.load("600 40px 'Ibarra Real Nova'") || Promise.resolve()).then(dial, () => {});
   const ringMat = new THREE.MeshPhysicalMaterial({ name: "esfera", map: ringTex, emissiveMap: ringTex, emissive: 0xffffff, emissiveIntensity: 0.18, roughness: 0.4, clearcoat: 1, clearcoatRoughness: 0.1 });
   add(new THREE.RingGeometry(R - 0.02, 1.9, 128, 1), ringMat, medal, [0, 0, ZD]);
   add(new THREE.CircleGeometry(R - 0.01, 128), face, medal, [0, 0, ZD + 0.002]);
@@ -121,7 +122,7 @@ export async function iniciarEscena(canvas, S, alListo) {
   resize(); addEventListener("resize", resize);
 
   const cur = { x: 0, y: 0, z: 0, s: 1 }, tanH = Math.tan(17 * Math.PI / 180);
-  let last = performance.now() / 1000, spin = 0, first = true, speed = 60, init = true;
+  let last = performance.now() / 1000, spin = 0, first = true, speed = 60, init = true, empuje = 0;
   const tick = () => {
     requestAnimationFrame(tick);
     if (document.hidden) return;
@@ -132,7 +133,8 @@ export async function iniciarEscena(canvas, S, alListo) {
     S.scrollVel *= 0.9;
     const boost = now < S.boostT ? Math.sin(Math.min(1, (S.boostT - now) / 1.6) * Math.PI) : 0;
     const warp = S.introT0 == null ? 38 : 150 * (1 - easeOut((now - S.introT0) / 2.6 * 1.1));
-    const target = (7 + Math.min(60, Math.abs(S.scrollVel) * 0.9) + warp + boost * 190) * calm;
+    empuje += ((S.empuje || 0) - empuje) * 0.05; // al acercarse a una puerta del tiempo
+    const target = (7 + Math.min(60, Math.abs(S.scrollVel) * 0.9) + warp + boost * 190 + empuje * 28) * calm;
     speed += (target - speed) * 0.08;
     const tail = Math.max(0.06, speed * 0.045);
     for (let i = 0; i < N; i++) {
@@ -150,7 +152,7 @@ export async function iniciarEscena(canvas, S, alListo) {
     const wide = innerWidth >= 900 && camera.aspect > 1.1;
     const P = pose(S, wide, camera.aspect), d = 10 - P.z;
     const tx = P.xf * tanH * d * camera.aspect, ty = P.yf * tanH * d;
-    const a = init ? 1 : 0.05; init = false;
+    const a = init || S.reduce ? 1 : 0.05; init = false;
     cur.x += (tx - cur.x) * a; cur.y += (ty - cur.y) * a; cur.z += (P.z - cur.z) * a; cur.s += (P.s - cur.s) * a;
     spin += dt * (0.25 + (1 - e) * 5 + boost * 4) * calm;
     medal.rotation.y = Math.sin(spin * 0.6) * 0.45 + m.x * 0.55 + (1 - e) * 6 + boost * 1.2;
