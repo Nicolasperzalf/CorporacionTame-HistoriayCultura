@@ -38,6 +38,8 @@
 /* 2 · BASE ----------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; background: var(--fondo); }
+/* el zoom de entrada (.app a escala 1.18) no debe ensanchar la página en el celular */
+html { overflow-x: clip; }
 body { margin: 0; background: var(--fondo); color: var(--perla); font-family: var(--f-texto); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 img { display: block; max-width: 100%; }
 a { color: var(--oro); }

@@ -220,17 +220,21 @@ export async function atravesar({ origen, numeral, antes = "Capítulo", titulo, 
   app.style.transformOrigin = `50% ${scrollY + innerHeight / 2}px`;
   const abre = portal.animate([{ clipPath: recorteDesde(origen) }, { clipPath: "inset(0px 0px 0px 0px round 0px 0px 0px 0px)" }], { duration: TIEMPOS.abre, easing: CURVA.mueve, fill: "both" });
   const aleja = app.animate([{ opacity: 1, transform: "scale(1)", filter: "blur(0px)" }, { opacity: 0, transform: "scale(.93)", filter: desenfoque }], { duration: TIEMPOS.abre * 0.9, easing: CURVA.mueve, fill: "both" });
-  await abre.finished.catch(() => {});
-  cambiar();
-  app.style.transformOrigin = `50% ${innerHeight / 2}px`;
-  await esperar(TIEMPOS.mantiene);
-  alCruzar?.();
-  portal.classList.add("cruzando");
-  aleja.cancel();
-  const llega = app.animate([{ opacity: 0, transform: "scale(.95)", filter: desenfoque }, { opacity: 1, transform: "scale(1)", filter: "blur(0px)" }], { duration: TIEMPOS.cruza, easing: CURVA.sale });
-  const cruza = portal.animate([{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(1.6)" }], { duration: TIEMPOS.cruza * 0.85, easing: "cubic-bezier(.5, 0, .75, 0)", fill: "both" });
-  await Promise.all([cruza.finished, llega.finished].map(p => p.catch(() => {})));
-  portal.hidden = true; portal.classList.remove("abierto", "cruzando");
-  abre.cancel(); cruza.cancel();
-  app.style.transformOrigin = "";
+  let cruza = null;
+  try {
+    await abre.finished.catch(() => {});
+    cambiar();
+    app.style.transformOrigin = `50% ${innerHeight / 2}px`;
+    await esperar(TIEMPOS.mantiene);
+    alCruzar?.();
+    portal.classList.add("cruzando");
+    aleja.cancel();
+    const llega = app.animate([{ opacity: 0, transform: "scale(.95)", filter: desenfoque }, { opacity: 1, transform: "scale(1)", filter: "blur(0px)" }], { duration: TIEMPOS.cruza, easing: CURVA.sale });
+    cruza = portal.animate([{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(1.6)" }], { duration: TIEMPOS.cruza * 0.85, easing: "cubic-bezier(.5, 0, .75, 0)", fill: "both" });
+    await Promise.all([cruza.finished, llega.finished].map(p => p.catch(() => {})));
+  } finally { // pase lo que pase, el portal se cierra y el sitio vuelve a verse
+    portal.hidden = true; portal.classList.remove("abierto", "cruzando");
+    abre.cancel(); aleja.cancel(); cruza?.cancel();
+    app.style.transformOrigin = "";
+  }
 }

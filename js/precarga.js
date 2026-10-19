@@ -97,14 +97,15 @@ const FRISO = [
   T("M1900 340C1910 330 1924 328 1934 334C1944 326 1960 326 1970 336")
 ];
 
-// Mensajes de etapa y datos de la época (citas literales de José Gumilla, «El Orinoco ilustrado», 1741)
+// Mensajes de etapa y datos de la época. El tercer valor indica si el texto es cita literal
+// (se muestra entre comillas) o un resumen (las palabras textuales van entre « » dentro del resumen).
 const ETAPAS = ["Encendiendo las estrellas", "Afinando el reloj", "Abriendo el archivo de Tame", "Llegando a 2029"];
 const DATOS = [
-  ["«…el río Tame, que baxa caudaloso de las nevadas de Chita, y tiene á sus riberas las dos numerosas Misiones de Giraras y de Betoyes».", "José Gumilla, El Orinoco ilustrado, 1741"],
-  ["Las canoas se hacían de un solo tronco, ahuecado con fuego; los arcos, flechas y lanzas, «de macana, palo durísimo».", "Según José Gumilla, 1741"],
-  ["En la reducción de Tame se levantaron 18 caneyes, casas grandes, donde vivían 450 indígenas.", "Corporación Tame, La ciudad La Palma de Espinosa"],
-  ["Se untaban «desde la coronilla de la cabeza hasta las puntas de los piés con aceyte y achote», para vestirse y protegerse del sol y los mosquitos.", "José Gumilla, El Orinoco ilustrado, 1741"],
-  ["Hoy pueblos como los makaguán, hitnü y sikuani siguen viviendo en el territorio de Tame.", "Memoria viva"]
+  ["…el rio Tame, que baxa caudaloso de las nevadas de Chita, y tiene á sus riberas las dos numerosas Misiones de Giraras y de Betoyes", "José Gumilla, El Orinoco ilustrado, 1741", true],
+  ["Las canoas se ahuecaban con fuego, y los arcos, flechas y lanzas se labraban «de macana, palo durísimo».", "Según José Gumilla, El Orinoco ilustrado, 1741", false],
+  ["En la reducción de Tame se levantaron 18 caneyes, casas grandes, y se reunieron 450 indígenas.", "Según Julio César Lamus Gélvez, La ciudad La Palma de Espinosa", false],
+  ["Se untaban «desde la coronilla de la cabeza hasta las puntas de los piés» con aceite y achote: era su vestido y los protegía del sol y los zancudos.", "Según José Gumilla, El Orinoco ilustrado, 1741", false],
+  ["Hoy los betoyes, hitnü, makaguán, sikuani y u'wa siguen viviendo en el territorio de Tame.", "Memoria viva", false]
 ];
 
 const NS = "http://www.w3.org/2000/svg";
@@ -131,7 +132,9 @@ export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
   const tramos = trazos.map(p => { const b = p.getBBox(), len = p.getTotalLength(); return { p, len, ini: lim(b.x / 2000 * 0.9), fin: lim((b.x + b.width) / 2000 * 0.9 + 0.1) }; });
   const marcas = [...aro.querySelectorAll(".marca")], avance = aro.querySelector(".aro-avance");
 
-  let paneo = 0, mostrado = 0, t0 = performance.now(), fin = false, iDato = -1, ultimoDato = 0, listoEn = 0;
+  let paneo = 0, mostrado = 0, t0 = performance.now(), fin = false, iDato = -1, ultimoDato = -1e9, listoEn = 0, lento = false; // el primer dato se muestra de una vez
+  // Mientras carga, lo de atrás no recibe foco ni clics
+  const app = document.getElementById("app"); if (app) app.inert = true;
   const minimo = preferencia == null ? 3200 : 1800; // la primera visita se toma su tiempo para el dibujo
   const pintar = p => {
     anio.textContent = String(1629 + Math.round(p * 400));
@@ -153,12 +156,14 @@ export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
       paneo += (lim(vw * (p >= 1 ? 0.5 : 0.55) - x, vw - w, 0) - paneo) * 0.08;
       svg.style.transform = `translateX(${paneo.toFixed(1)}px)`;
     } else svg.style.transform = "";
-    msg.textContent = p >= 1 ? "Todo listo para el viaje" : ETAPAS[Math.min(3, Math.floor(p * 4))];
+    // solo se reescribe si cambia (es una región que leen los lectores de pantalla)
+    const texto = p >= 1 ? "Todo listo para el viaje" : lento ? "La conexión va lenta: el fondo 3D se sumará en el camino" : ETAPAS[Math.min(3, Math.floor(p * 4))];
+    if (msg.textContent !== texto) msg.textContent = texto;
   };
   const cambiarDato = () => {
     iDato = (iDato + 1) % DATOS.length;
     dato.classList.remove("ve"); void dato.offsetWidth;
-    dato.querySelector("q").textContent = DATOS[iDato][0].replace(/^«|»\.?$/g, "");
+    const q = dato.querySelector("q"); q.textContent = DATOS[iDato][0]; q.classList.toggle("resumen", !DATOS[iDato][2]);
     cita.textContent = DATOS[iDato][1];
     dato.classList.add("ve");
   };
@@ -169,6 +174,7 @@ export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
   const entrar = conSonido => {
     if (fin) return; fin = true;
     el.classList.add("sale");
+    if (app) app.inert = false;
     alEntrar(conSonido);
     setTimeout(() => el.remove(), 1700);
   };
@@ -196,7 +202,7 @@ export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
     pintar(mostrado);
     if (ahora - ultimoDato > 4200) { ultimoDato = ahora; cambiarDato(); }
     // Conexión lenta: si el contenido ya está pero el fondo 3D no, se puede entrar ya
-    if (t > 6500 && e.contenido && !e.escena && ya.hidden && puerta.hidden) { ya.hidden = false; msg.textContent = "La conexión va lenta: el fondo 3D se sumará en el camino"; }
+    if (t > 6500 && e.contenido && !e.escena && ya.hidden && puerta.hidden) { ya.hidden = false; lento = true; }
     if (mostrado >= 1) {
       if (!listoEn) listoEn = ahora;
       if (ahora - listoEn > 450) { // pausa breve para ver el dibujo completo

@@ -496,7 +496,9 @@ function ir(id, origen) {
   cerrarMenu();
   if (id === S.page) { scrollTo({ top: 0, behavior: "smooth" }); return; }
   const n = PAGES.findIndex(p => p.id === id), p = PAGES[n], inicio = id === "inicio";
-  const cambiar = () => { scrollTo({ top: 0, behavior: "instant" }); try { history.replaceState(null, "", "#/" + id); } catch (e) {} S.page = id; render(); };
+  const hashIni = location.hash;
+  // (si la persona cambió la dirección durante el viaje, no se le pisa: al terminar se sigue hasta allá)
+  const cambiar = () => { scrollTo({ top: 0, behavior: "instant" }); if (location.hash === hashIni || location.hash === "#/" + id) try { history.replaceState(null, "", "#/" + id); } catch (e) {} S.page = id; render(); };
   viajando = true; S.empuje = 0;
   S.boostT = performance.now() / 1000 + (TIEMPOS.abre + TIEMPOS.mantiene + TIEMPOS.cruza) / 1000;
   sonido.viaje((TIEMPOS.abre + TIEMPOS.mantiene) / 1000);
@@ -504,7 +506,12 @@ function ir(id, origen) {
     origen: desdeMenu ? null : origen, cambiar,
     antes: inicio ? "Regreso al" : "Capítulo", numeral: inicio ? "XII" : p.n, titulo: inicio ? "Inicio" : p.label,
     icono: ICONOS[id]?.() || "", alCruzar: () => sonido.llegada(n)
-  }).finally(() => { viajando = false; });
+  }).finally(() => {
+    viajando = false;
+    // si la dirección cambió durante el viaje (atrás/adelante), seguir hasta allá
+    const h = (location.hash.match(/^#\/(\w+)/) || [])[1];
+    if (h && h !== S.page) ir(h);
+  });
 }
 function abrirMenu() { $("#menu").hidden = false; document.body.style.overflow = "hidden"; $(".menu-cerrar").focus(); $$("#menu [data-dibujo]").forEach(redibujar); }
 function cerrarMenu() { if ($("#menu").hidden) return; $("#menu").hidden = true; document.body.style.overflow = ""; }
@@ -548,7 +555,6 @@ function construirNav() {
 function pintarSonido() {
   $$("[data-sonido]").forEach(b => {
     b.setAttribute("aria-pressed", sonido.activo);
-    b.setAttribute("aria-label", sonido.activo ? "Silenciar el sonido del viaje" : "Activar el sonido del viaje");
     b.title = sonido.activo ? "Sonido activado" : "Sonido apagado";
   });
 }

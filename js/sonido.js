@@ -66,7 +66,7 @@ function crearAmbiente() {
 function iniciarTics() {
   let proximo = Math.ceil(performance.now() / 1000), par = false;
   tics = setInterval(() => {
-    if (!activo || document.hidden) return;
+    if (!activo || document.hidden || ctx.state !== "running") { proximo = Math.ceil(performance.now() / 1000); return; } // en pausa no se acumulan tics
     const ahora = performance.now() / 1000;
     while (proximo < ahora + 0.3) {
       if (proximo > ahora) clic(ctx.currentTime + (proximo - ahora), par ? 1900 : 2500, 0.05);
@@ -85,7 +85,7 @@ function clic(t, f, g) {
 function iniciarGrillos() {
   const cantar = () => {
     grillos = setTimeout(cantar, 1800 + Math.random() * 4200);
-    if (!activo || document.hidden) return;
+    if (!activo || document.hidden || ctx.state !== "running") return;
     const t = ctx.currentTime + 0.05, f = 4200 + Math.random() * 700, pulsos = 2 + Math.floor(Math.random() * 3);
     const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null; if (pan) pan.pan.value = Math.random() * 1.6 - 0.8;
     const v = ctx.createGain(); v.gain.value = 0;
@@ -133,8 +133,10 @@ export const sonido = {
     // arranca con el primer toque o tecla.
     ctx.resume();
     if (ctx.state !== "running") {
-      const despertar = () => { if (activo) ctx.resume(); removeEventListener("pointerdown", despertar); removeEventListener("keydown", despertar); };
-      addEventListener("pointerdown", despertar); addEventListener("keydown", despertar);
+      // iPhone solo acepta arrancar el audio en un toque completo (touchend/click), no en pointerdown
+      const gestos = ["pointerdown", "touchend", "click", "keydown"];
+      const despertar = () => { if (!activo) return; ctx.resume().then(() => { if (ctx.state === "running") gestos.forEach(g => removeEventListener(g, despertar, true)); }); };
+      gestos.forEach(g => addEventListener(g, despertar, true));
     }
     if (!ambiente) { ambiente = crearAmbiente(); iniciarTics(); iniciarGrillos(); }
     activo = true;

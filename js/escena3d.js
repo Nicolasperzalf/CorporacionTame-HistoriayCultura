@@ -14,7 +14,7 @@ function pose(S, wide, aspect) {
     const H = wide ? { xf: 0.5, yf: 0.12, z: 0, s: 1 } : { xf: 0, yf: 0.42, z: 0, s: narrowS };
     // al bajar a las puertas, el reloj se aleja a la esquina superior, como una luna lejana, para no tapar textos ni puertas
     const C = wide ? { xf: 0.9, yf: 0.88, z: -75, s: 1.4 } : { xf: 0.74, yf: 0.9, z: -80, s: 1.4 };
-    const p = easeOut(Math.min(1, scrollY / (innerHeight * 0.9)));
+    const k = Math.min(1, scrollY / (innerHeight * 0.9)), p = S.reduce ? (k > 0.5 ? 1 : 0) : easeOut(k);
     const o = {}; for (const k in H) o[k] = H[k] + (C[k] - H[k]) * p; return o;
   }
   if (S.page === "nosotros") return wide ? { xf: 0.52, yf: 0.02, z: 0, s: 1.15 } : { xf: 0, yf: 0.3, z: -10, s: 1.1 };
@@ -152,7 +152,7 @@ export async function iniciarEscena(canvas, S, alListo) {
     const wide = innerWidth >= 900 && camera.aspect > 1.1;
     const P = pose(S, wide, camera.aspect), d = 10 - P.z;
     const tx = P.xf * tanH * d * camera.aspect, ty = P.yf * tanH * d;
-    const a = init ? 1 : 0.05; init = false;
+    const a = init || S.reduce ? 1 : 0.05; init = false;
     cur.x += (tx - cur.x) * a; cur.y += (ty - cur.y) * a; cur.z += (P.z - cur.z) * a; cur.s += (P.s - cur.s) * a;
     spin += dt * (0.25 + (1 - e) * 5 + boost * 4) * calm;
     medal.rotation.y = Math.sin(spin * 0.6) * 0.45 + m.x * 0.55 + (1 - e) * 6 + boost * 1.2;
