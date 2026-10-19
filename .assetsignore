@@ -3,3 +3,7 @@
 wrangler.jsonc
 .assetsignore
 .wrangler
+.nojekyll
+CLAUDE.md
+README.md
+supabase

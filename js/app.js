@@ -4,9 +4,16 @@
 //          3 Navegación · 4 Efectos · 5 Arranque
 //  El CONTENIDO no se escribe aquí: viene de la base de datos
 //  (js/datos.js) o del respaldo js/contenido-local.js.
+//  El MOVIMIENTO (revelados, luces, puertas, portal) vive en
+//  js/movimiento.js; el SONIDO en js/sonido.js; los ÍCONOS en
+//  js/iconos.js y la PANTALLA DE CARGA en js/precarga.js.
 // ==========================================================
 import { cargarContenido, enviarAporte, conectado } from "./datos.js";
 import { iniciarEscena } from "./escena3d.js";
+import { MOV, TIEMPOS, mascaraViva, revelar, redibujar, iniciarLuces, observarLuces, animarPuertas, atravesar, enmascarar } from "./movimiento.js";
+import { sonido } from "./sonido.js";
+import { ICONOS, reloj, ondas } from "./iconos.js";
+import { iniciarPrecarga } from "./precarga.js";
 
 /* 1 · ESTADO Y UTILIDADES ------------------------------------ */
 const $ = (s, r = document) => r.querySelector(s);
@@ -36,7 +43,8 @@ const rol = t => `<span class="rol"><span>${t}</span><span aria-hidden="true">${
 
 const S = { // estado compartido con la escena 3D
   page: "inicio", mouse: { x: 0, y: 0, tx: 0, ty: 0 }, scrollVel: 0, boostT: 0, introT0: null,
-  reduce: matchMedia("(prefers-reduced-motion: reduce)").matches,
+  empuje: 0, // 0–1: las estrellas aceleran un poco al acercarse a una puerta
+  reduce: MOV.reduce,
   coarse: matchMedia("(pointer: coarse)").matches
 };
 let C = null, A = {};           // contenido y ajustes
@@ -67,37 +75,41 @@ V.inicio = () => {
       <h1 aria-label="Viaja cuatro siglos sin salir de Tame.">${pal.map(([w, o], i) => `<span class="pal" aria-hidden="true"><span class="${o ? "oro" : ""}" style="transition-delay:${(1.25 + i * .08).toFixed(2)}s">${w}</span></span>`).join(" ")}</h1>
       <p class="hero-p aparece" style="--d:1.9s">${esc(A.hero_texto)}</p>
       <div class="hero-btns aparece" style="--d:2.05s">
-        <button type="button" class="btn-oro mag" data-scroll="capitulos">${rol("Iniciar el viaje")} <i aria-hidden="true"><span>↓</span><span>↓</span></i></button>
-        <button type="button" class="btn-vidrio mag" data-ir="aportar">${rol("Aportar un recuerdo")}</button>
+        <button type="button" class="btn-oro luz mag" data-scroll="capitulos">${rol("Iniciar el viaje")}${reloj(180)}</button>
+        <button type="button" class="btn-vidrio luz mag" data-ir="aportar">${rol("Aportar un recuerdo")}</button>
       </div>
     </div>
     <span class="hero-scroll aparece" style="--d:2.4s" aria-hidden="true"><span></span></span>
   </section>
-  ${franja()}
   <section class="seccion capitulos" id="capitulos" data-screen-label="Capítulos">
     <div class="cabecera">
       <div><p class="antetitulo" data-rv>Destinos del viaje</p><h2 class="titulo-2" data-mask>Seis puertas <em>al tiempo.</em></h2></div>
-      <p class="lead" data-rv>Cada capítulo es una estación del archivo. Entra por la que prefieras; el viaje continúa en la siguiente.</p>
+      <p class="lead" data-rv>Cada capítulo es una hora del reloj y una puerta del archivo. Acércate a una: el tiempo se acelera. Crúzala y viajas.</p>
     </div>
-    <div class="rejilla-destinos">${PAGES.slice(1).map((p, i) => `
-      <div data-rv>
-        <button type="button" class="destino tilt" data-ir="${p.id}">
-          <span class="destino-fantasma" aria-hidden="true">${p.n}</span>
-          <span class="destino-top"><b>Capítulo ${p.n}</b><small>${esc(kicker(p))}</small></span>
-          <span><span class="d-t">${p.label}</span><span class="d-b">${p.blurb}</span></span>
-          <span class="destino-pie">${rol("Viajar")}<span class="flecha" aria-hidden="true"><span>→</span><span>→</span></span></span>
+    <ol class="puertas">${PAGES.slice(1).map((p, i) => `
+      <li data-rv>
+        <button type="button" class="puerta luz tilt" data-ir="${p.id}" data-forma="arco" data-hora="${i + 1}" style="--h:${i}">
+          <span class="puerta-vano" aria-hidden="true">
+            <span class="tunel">${'<i class="anillo"></i>'.repeat(6)}</span>
+            <span class="puerta-ico">${ICONOS[p.id]()}</span>
+          </span>
+          <span class="puerta-num" aria-hidden="true">${p.n}</span>
+          <span class="puerta-t"><span class="sr">Capítulo ${p.n}: </span>${p.label}</span>
+          <span class="puerta-k">${esc(kicker(p))}</span>
         </button>
-      </div>`).join("")}
-    </div>
+      </li>`).join("")}
+    </ol>
   </section>`;
 };
-
-// Franja de años que se desliza sin fin entre la portada y los capítulos
-function franja() {
-  const anios = [...C.hitos.map(h => [h.anio, h.titulo]), ["2029", "Tame, 400 años"]];
-  const fila = oculta => `<span class="franja-fila"${oculta ? ' aria-hidden="true"' : ""}>${anios.map(([a, t]) => `<span class="franja-item"><b>${esc(a)}</b>${esc(t)}</span>`).join("")}</span>`;
-  return `<div class="franja" role="marquee" aria-label="Hitos de la historia de Tame"><div class="franja-pista">${fila()}${fila(true)}</div></div>`;
-}
+M.inicio = () => {
+  // Al acercarse a una puerta: su túnel acelera, las estrellas del fondo también, suena su cuerda y su ícono se redibuja
+  alSalir(animarPuertas($("#vista"), p => {
+    const n = +p.dataset.hora;
+    S.empuje = 1; sonido.nota(n); redibujar($(".puerta-ico svg", p));
+    p.addEventListener("pointerleave", () => { S.empuje = 0; }, { once: true });
+    p.addEventListener("blur", () => { S.empuje = 0; }, { once: true });
+  }));
+};
 
 // ── I · Quiénes somos ──
 V.nosotros = () => `
@@ -193,8 +205,8 @@ V.monumentos = () => {
     <div class="mon-abajo">
       <div class="mon-txt" id="mon-txt" aria-live="polite"></div>
       <div class="mon-flechas">
-        <button type="button" class="btn-circ grande" data-mon="-1" aria-label="Monumento anterior">←</button>
-        <button type="button" class="btn-circ grande" data-mon="1" aria-label="Monumento siguiente">→</button>
+        <button type="button" class="btn-circ grande luz" data-mon="-1" aria-label="Monumento anterior">${reloj(-90)}</button>
+        <button type="button" class="btn-circ grande luz" data-mon="1" aria-label="Monumento siguiente">${reloj(90)}</button>
       </div>
     </div>
   </section>`;
@@ -268,7 +280,7 @@ M.historia = () => {
         <div class="tl-texto vidrio">
           <p class="meta"><span>Hito ${pad(tlI + 1)} / ${pad(T.length)}</span><span>${esc(h.etapa)}</span></p>
           <h2 data-vivo>${esc(h.titulo)}</h2><p>${esc(h.texto)}</p>
-          <div class="fila-btns"><button type="button" class="btn-circ" data-tlpaso="-1" aria-label="Hito anterior">←</button><button type="button" class="btn-circ" data-tlpaso="1" aria-label="Hito siguiente">→</button></div>
+          <div class="fila-btns"><button type="button" class="btn-circ luz" data-tlpaso="-1" aria-label="Hito anterior">${reloj(-90)}</button><button type="button" class="btn-circ luz" data-tlpaso="1" aria-label="Hito siguiente">${reloj(90)}</button></div>
         </div>
       </div>`;
     mascaraViva($("[data-vivo]", det));
@@ -353,7 +365,8 @@ M.publicaciones = () => {
       <p class="ctx">Sobre el libro</p>
       <div class="desc${esVerso ? " verso" : ""}">${parrafos(b.descripcion).map(p => `<p>${esc(p)}</p>`).join("")}</div>
       ${b.autores ? `<p class="autores"><b>${/,| y /.test(b.autores) ? "AUTORES" : "AUTOR"} · </b>${esc(b.autores)}</p>` : ""}
-      <a class="btn-oro" href="${esc(enlaceWa(b.whatsapp || A.whatsapp, `Hola, estoy interesado en comprar el libro «${b.titulo}${b.volumen ? ", " + b.volumen : ""}». ¿Me pueden dar información sobre precio y entrega?`))}" target="_blank" rel="noopener noreferrer">${rol("Solicitar ejemplar")} <i aria-hidden="true"><span>→</span><span>→</span></i></a>`;
+      <a class="btn-oro" href="${esc(enlaceWa(b.whatsapp || A.whatsapp, `Hola, estoy interesado en comprar el libro «${b.titulo}${b.volumen ? ", " + b.volumen : ""}». ¿Me pueden dar información sobre precio y entrega?`))}" target="_blank" rel="noopener noreferrer">${rol("Solicitar ejemplar")}${reloj(45)}</a>`;
+    observarLuces(info);
     $$("[data-lib]").forEach(t => t.setAttribute("aria-selected", +t.dataset.lib === libI));
     mascaraViva($("[data-vivo]", info));
   };
@@ -395,7 +408,7 @@ M.publicaciones = () => {
 // ── VI · Aporte ciudadano ──
 V.aportar = () => `
   <section class="seccion aportar" data-screen-label="VI · Aporte ciudadano">
-    <p class="antetitulo" data-rv>Capítulo VI · Viaje en el tiempo</p>
+    <p class="antetitulo" data-rv>Capítulo VI · Aporte ciudadano</p>
     <h1 class="titulo" data-mask>Tu recuerdo<br><em>es historia.</em></h1>
     <div class="aporte-fila">
       <div class="aporte-info vidrio" data-rv>
@@ -414,7 +427,7 @@ V.aportar = () => `
         <label class="ancho">Cuéntanos sobre este recuerdo<textarea name="relato" rows="3" maxlength="4000" placeholder="¿Qué historia guarda? ¿Dónde y cuándo fue?"></textarea></label>
         <label class="ancho adjunto">Adjuntar archivo<input name="archivo" type="file" accept="image/*,.pdf,.doc,.docx"><small>JPG, PNG, PDF o Word · máximo 10 MB</small></label>
         <input name="sitio_web" type="text" tabindex="-1" autocomplete="off" class="sr" aria-hidden="true">
-        <div class="ancho enviar"><button type="submit" class="btn-oro">${rol("Enviar aporte")} <i aria-hidden="true"><span>→</span><span>→</span></i></button><p class="estado-form" id="form-estado" role="status" aria-live="polite"></p></div>
+        <div class="ancho enviar"><button type="submit" class="btn-oro luz">${rol("Enviar aporte")}${reloj(90)}</button><p class="estado-form" id="form-estado" role="status" aria-live="polite"></p></div>
       </form>
     </div>
   </section>`;
@@ -443,91 +456,61 @@ function render() {
   $("#vista").innerHTML = V[S.page]();
   M[S.page]?.();
   marcarNav();
-  revelar();
+  revelar([$("#vista"), $(".siguiente-caja"), $(".pie")]);
+  observarLuces(document);
+}
+// Esfera del reloj "Siguiente destino": recorre las horas del viaje (XII = Inicio, I … VI = capítulos).
+// La manecilla corta marca el capítulo actual y, al acercarte, avanza a la hora del siguiente.
+function esfera(i, j) {
+  const pt = (h, r) => { const a = h / 12 * Math.PI * 2; return [(100 + Math.sin(a) * r).toFixed(1), (100 - Math.cos(a) * r).toFixed(1)]; };
+  const marcas = Array.from({ length: 60 }, (_, k) => { const [x1, y1] = pt(k / 5, k % 5 ? 81 : 76), [x2, y2] = pt(k / 5, 85); return `M${x1} ${y1}L${x2} ${y2}`; }).join("");
+  const arco = (h1, r) => { if (h1 <= 0) return ""; const [x0, y0] = pt(0, r), [x1, y1] = pt(h1, r); return `M${x0} ${y0}A${r} ${r} 0 ${h1 > 6 ? 1 : 0} 1 ${x1} ${y1}`; };
+  const horas = ["XII", "I", "II", "III", "IV", "V", "VI"].map((n, h) => { const [x, y] = pt(h, 64); return `<text x="${x}" y="${y}" class="${h === j ? "prox" : h && h <= i ? "hecha" : ""}">${n}</text>`; }).join("");
+  return `<svg viewBox="0 0 200 200" focusable="false">
+    <circle class="sd-bisel" cx="100" cy="100" r="97"/><circle class="sd-cara" cx="100" cy="100" r="89"/>
+    <path class="sd-marcas" d="${marcas}"/>
+    <path class="sd-ruta" d="${arco(6, 92)}"/><path class="sd-hecho" d="${arco(i, 92)}"/>
+    ${horas}
+    <g class="sd-hora" style="--h0:${i * 30}deg;--h1:${(j || 12) * 30}deg"><path d="M100 110V56"/><path d="M94.5 65 100 55l5.5 10"/></g>
+    <g class="sd-min"><path d="M100 112V26"/></g>
+    <circle class="sd-eje" cx="100" cy="100" r="4.5"/>
+  </svg>`;
 }
 function marcarNav() {
   $$("[data-nav]").forEach(b => b.setAttribute("aria-current", b.dataset.nav === S.page));
-  const i = PAGES.findIndex(p => p.id === S.page), sig = PAGES[(i + 1) % PAGES.length], btn = $("#siguiente");
+  const i = PAGES.findIndex(p => p.id === S.page), j = (i + 1) % PAGES.length, sig = PAGES[j], btn = $("#siguiente");
   btn.dataset.ir = sig.id;
-  $("small", btn).textContent = sig.id === "inicio" ? "Fin del recorrido · volver" : "Siguiente destino · Capítulo " + sig.n;
-  const b = $("b", btn);
-  b.textContent = sig.id === "inicio" ? "Regresar al inicio" : sig.label;
+  $("#sig-k").textContent = sig.id === "inicio" ? "Fin del recorrido · Regreso" : "Siguiente destino · Capítulo " + sig.n;
+  const b = $("#sig-t");
+  b.textContent = sig.id === "inicio" ? "Volver al inicio" : sig.label;
   delete b.dataset.mk; b.classList.remove("visto");
-  $("#sig-num").textContent = sig.id === "inicio" ? "XII" : sig.n;
-  $("#sig-riel").innerHTML = PAGES.slice(1).map((p, k) => `<span class="${k < i ? "hecho" : k === i ? "proximo" : ""}" style="--k:${k}"></span>`).join("");
+  $("#sig-dial").innerHTML = esfera(i, j); $("#sig-dial").classList.remove("visto"); // la manecilla vuelve a avanzar al aparecer
   document.body.classList.toggle("leyendo", S.page !== "inicio");
 }
+// Viajar a un capítulo: el elemento tocado (puerta, reloj, botón) se abre como portal (js/movimiento.js),
+// las estrellas del fondo aceleran, suena el soplo del viaje y, al llegar, el arpa.
 let viajando = false;
-function ir(id) {
+function ir(id, origen) {
   if (!PAGES.some(p => p.id === id) || viajando) return;
+  const desdeMenu = !$("#menu").hidden;
   cerrarMenu();
   if (id === S.page) { scrollTo({ top: 0, behavior: "smooth" }); return; }
+  const n = PAGES.findIndex(p => p.id === id), p = PAGES[n], inicio = id === "inicio";
   const cambiar = () => { scrollTo({ top: 0, behavior: "instant" }); try { history.replaceState(null, "", "#/" + id); } catch (e) {} S.page = id; render(); };
-  if (S.reduce) { cambiar(); return; }
-  const p = PAGES.find(x => x.id === id);
-  for (const [sel, t] of [["#viaje-n", p.n], ["#viaje-t", p.label]]) { const el = $(sel); el.textContent = t; delete el.dataset.mk; enmascarar(el); }
-  void $("#viaje").offsetWidth; // fija el estado inicial para que las palabras suban
-  viajando = true; S.boostT = performance.now() / 1000 + 1.6;
-  document.body.classList.add("viajando", "saliendo");
-  setTimeout(() => {
-    cambiar();
-    document.body.classList.replace("saliendo", "entrando");
-    void $("#app").offsetWidth;
-    setTimeout(() => { document.body.classList.remove("entrando", "viajando"); viajando = false; }, 150);
-  }, 750);
+  viajando = true; S.empuje = 0;
+  S.boostT = performance.now() / 1000 + (TIEMPOS.abre + TIEMPOS.mantiene + TIEMPOS.cruza) / 1000;
+  sonido.viaje((TIEMPOS.abre + TIEMPOS.mantiene) / 1000);
+  atravesar({
+    origen: desdeMenu ? null : origen, cambiar,
+    antes: inicio ? "Regreso al" : "Capítulo", numeral: inicio ? "XII" : p.n, titulo: inicio ? "Inicio" : p.label,
+    icono: ICONOS[id]?.() || "", alCruzar: () => sonido.llegada(n)
+  }).finally(() => { viajando = false; });
 }
-function abrirMenu() { $("#menu").hidden = false; document.body.style.overflow = "hidden"; $(".menu-cerrar").focus(); }
+function abrirMenu() { $("#menu").hidden = false; document.body.style.overflow = "hidden"; $(".menu-cerrar").focus(); $$("#menu [data-dibujo]").forEach(redibujar); }
 function cerrarMenu() { if ($("#menu").hidden) return; $("#menu").hidden = true; document.body.style.overflow = ""; }
 
 /* 4 · EFECTOS ------------------------------------------------ */
-// Revelado con máscara: cada palabra del titular vive en una "ventana" (overflow oculto)
-// y sube desde abajo cuando el titular entra en pantalla. El texto sigue siendo texto
-// real, así que lectores de pantalla y buscadores lo leen igual.
-function enmascarar(el) {
-  if (!el || el.dataset.mk) return el;
-  el.dataset.mk = "1"; let i = 0;
-  const partir = nodo => [...nodo.childNodes].forEach(n => {
-    if (n.nodeType === 3) {
-      const frag = document.createDocumentFragment();
-      n.textContent.split(/(\s+)/).forEach(w => {
-        if (!w) return;
-        if (!w.trim()) { frag.append(" "); return; }
-        const caja = document.createElement("span"), pal = document.createElement("span");
-        caja.className = "mk"; pal.className = "mk-i"; pal.style.setProperty("--i", i++); pal.textContent = w;
-        caja.append(pal); frag.append(caja);
-      });
-      n.replaceWith(frag);
-    } else if (n.nodeType === 1 && n.tagName !== "BR") partir(n);
-  });
-  partir(el); return el;
-}
-// Para titulares que cambian sin salir del capítulo (monumento, hito, libro)
-function mascaraViva(el) {
-  if (!el) return;
-  enmascarar(el);
-  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("visto")));
-}
-// Movimientos encadenados: lo que entra a la vez en pantalla se revela en orden de lectura
-// (antetítulo → titular palabra a palabra → texto → botones), con 110 ms entre cada paso.
-let io;
-function revelar() {
-  io && io.disconnect();
-  const els = $$("#vista [data-rv], #vista [data-mask], .siguiente [data-mask], .pie [data-rv], .pie [data-mask]").filter(el => !el.classList.contains("visto"));
-  els.forEach(el => el.hasAttribute("data-mask") && enmascarar(el));
-  if (S.reduce || !("IntersectionObserver" in window)) { els.forEach(el => el.classList.add("visto")); return; }
-  io = new IntersectionObserver(es => {
-    es.filter(en => en.isIntersecting).map(en => en.target)
-      .sort((a, b) => a.compareDocumentPosition(b) & 4 ? -1 : 1)
-      .forEach((el, n) => {
-        const d = Math.min(n, 4) * 110;
-        el.style.setProperty("--d0", d + "ms");
-        el.classList.remove("oculto"); el.classList.add("visto");
-        setTimeout(() => el.style.removeProperty("--d0"), 1600 + d);
-        io.unobserve(el);
-      });
-  }, { threshold: 0.12, rootMargin: "0px 0px -5% 0px" });
-  els.forEach(el => { if (el.hasAttribute("data-rv")) el.classList.add("oculto"); io.observe(el); });
-}
+// (Revelados, luces, puertas y portal: js/movimiento.js.) Aquí: cursor, imán, inclinación y scroll.
 function efectos() {
   const cursor = $("#cursor"), m = S.mouse, c = { x: -100, y: -100, px: -100, py: -100 };
   addEventListener("pointermove", e => {
@@ -535,7 +518,7 @@ function efectos() {
     if (S.reduce || S.coarse) return;
     const mag = e.target.closest?.(".mag"), tilt = e.target.closest?.(".tilt");
     if (mag) { const r = mag.getBoundingClientRect(); mag.style.transform = `translate(${((e.clientX - r.left - r.width / 2) * .22).toFixed(1)}px,${((e.clientY - r.top - r.height / 2) * .35).toFixed(1)}px)`; }
-    if (tilt) { const r = tilt.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; tilt.style.setProperty("--mx", x + "px"); tilt.style.setProperty("--my", y + "px"); tilt.style.transform = `perspective(1400px) rotateX(${((y / r.height - .5) * -4).toFixed(2)}deg) rotateY(${((x / r.width - .5) * 5).toFixed(2)}deg)`; }
+    if (tilt) { const r = tilt.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; tilt.style.setProperty("--mx", x + "px"); tilt.style.setProperty("--my", y + "px"); tilt.style.transform = `perspective(1400px) rotateX(${((y / r.height - .5) * -5).toFixed(2)}deg) rotateY(${((x / r.width - .5) * 6).toFixed(2)}deg)`; }
   }, { passive: true });
   addEventListener("pointerout", e => { const el = e.target.closest?.(".mag,.tilt"); if (el && !el.contains(e.relatedTarget)) el.style.transform = ""; });
   addEventListener("pointerover", e => cursor.classList.toggle("sobre", !!e.target.closest?.("a,button")), { passive: true });
@@ -546,14 +529,28 @@ function efectos() {
     S.scrollVel = scrollY - ultimo; ultimo = scrollY;
     if (S.page === "inicio") document.body.classList.toggle("leyendo", scrollY > innerHeight * .5);
   }, { passive: true });
+  // Un tic de madera al presionar cualquier botón (solo si el sonido está activo)
+  addEventListener("pointerdown", e => { if (e.target.closest?.("button, a")) sonido.toque(); }, { passive: true });
+  iniciarLuces();
 }
 
 /* 5 · ARRANQUE ----------------------------------------------- */
 function construirNav() {
   const cap = PAGES.slice(1);
-  $("#riel-nav").innerHTML = cap.map(p => `<button type="button" class="riel-btn" data-ir="${p.id}" data-nav="${p.id}" aria-label="${p.label}"><span>${p.n}</span><span class="riel-nombre" aria-hidden="true">${p.label}</span></button>`).join("");
-  $("#movil-nav").innerHTML = cap.map(p => `<button type="button" data-ir="${p.id}" data-nav="${p.id}" aria-label="${p.label}">${p.n}</button>`).join("");
-  $("#menu-nav").innerHTML = cap.map(p => `<button type="button" data-ir="${p.id}" data-nav="${p.id}"><b>${p.n}</b><span>${p.label}</span></button>`).join("");
+  $("#riel-nav").innerHTML = cap.map(p => `<button type="button" class="riel-btn" data-ir="${p.id}" data-nav="${p.id}" data-forma="circulo" aria-label="${p.label}"><span>${p.n}</span><span class="riel-nombre" aria-hidden="true">${p.label}</span></button>`).join("");
+  $("#movil-nav").innerHTML = cap.map(p => `<button type="button" data-ir="${p.id}" data-nav="${p.id}" data-forma="circulo" aria-label="${p.label}">${p.n}</button>`).join("");
+  $("#menu-nav").innerHTML = cap.map(p => `<button type="button" data-ir="${p.id}" data-nav="${p.id}"><b>${p.n}</b><span class="menu-ico">${ICONOS[p.id]()}</span><span>${p.label}</span></button>`).join("");
+  $("#sig-dial").dataset.forma = "circulo";
+  $("#sig-reloj").outerHTML = reloj(90);
+  enmascarar($("#portal-t"));
+}
+// Botón de sonido (barra lateral y barra del celular): las ondas se mueven cuando está activo
+function pintarSonido() {
+  $$("[data-sonido]").forEach(b => {
+    b.setAttribute("aria-pressed", sonido.activo);
+    b.setAttribute("aria-label", sonido.activo ? "Silenciar el sonido del viaje" : "Activar el sonido del viaje");
+    b.title = sonido.activo ? "Sonido activado" : "Sonido apagado";
+  });
 }
 function pie() {
   $("#red-wa").href = enlaceWa(A.whatsapp, "Hola, quisiera información sobre la Corporación Tame, Historia y Cultura."); $("#red-wa-t").textContent = verNumero(A.whatsapp);
@@ -562,37 +559,31 @@ function pie() {
 }
 function eventos() {
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-ir],[data-menu],[data-scroll]"); if (!t) return;
-    if (t.dataset.ir) ir(t.dataset.ir);
+    const t = e.target.closest("[data-ir],[data-menu],[data-scroll],[data-sonido]"); if (!t) return;
+    if (t.dataset.ir) ir(t.dataset.ir, t.id === "siguiente" ? $("#sig-dial") : t);
     else if (t.dataset.menu) t.dataset.menu === "abrir" ? abrirMenu() : cerrarMenu();
     else if (t.dataset.scroll) { const el = document.getElementById(t.dataset.scroll); if (el) scrollTo({ top: el.getBoundingClientRect().top + scrollY - (innerWidth < 900 ? 60 : 0), behavior: "smooth" }); }
+    else if (t.hasAttribute("data-sonido")) sonido.activar(!sonido.activo).then(pintarSonido);
   });
   addEventListener("keydown", e => { if (e.key === "Escape") cerrarMenu(); });
   addEventListener("hashchange", () => { const h = (location.hash.match(/^#\/(\w+)/) || [])[1]; if (h && h !== S.page) ir(h); });
 }
-function precarga(listo) {
-  const el = $("#precarga"), aro = $(".pre-progreso", el), pct = $(".pre-pct", el);
-  const fin = () => {
-    clearInterval(iv); if (el.classList.contains("sale")) return;
-    S.introT0 = performance.now() / 1000;
-    el.classList.add("sale"); document.body.classList.add("intro");
-    setTimeout(() => el.remove(), 1700);
-  };
-  if (S.reduce) { S.introT0 = performance.now() / 1000 - 10; el.remove(); document.body.classList.add("intro"); return; }
-  const t0 = performance.now();
-  const iv = setInterval(() => {
-    const t = performance.now() - t0;
-    let p = Math.min(1, t / 2200);
-    if (!listo() && t < 7000) p = Math.min(p, .94);
-    aro.style.setProperty("--p", (p * 360).toFixed(1) + "deg"); pct.textContent = String(1629 + Math.round(p * 400));
-    if (p >= 1) fin();
-  }, 40);
-  el.addEventListener("click", () => { if (listo()) fin(); });
-}
 
 let escenaLista = false, contenidoListo = false;
-precarga(() => escenaLista && contenidoListo);
-efectos(); eventos(); construirNav();
+$$("[data-sonido], .reloj-son").forEach(b => { b.innerHTML = ondas(); });
+iniciarPrecarga({
+  estado: () => ({ contenido: contenidoListo, escena: escenaLista }),
+  reduce: S.reduce,
+  preferencia: sonido.preferencia,
+  alEntrar: conSonido => {
+    S.introT0 = performance.now() / 1000 - (S.reduce ? 10 : 0);
+    document.body.classList.add("intro");
+    // La entrada con sonido: el soplo acompaña el zoom de entrada y el arpa da la bienvenida
+    if (conSonido) sonido.activar(true).then(() => { pintarSonido(); sonido.viaje(1.4); setTimeout(() => sonido.llegada(0), 1300); });
+    pintarSonido();
+  }
+});
+efectos(); eventos(); construirNav(); pintarSonido();
 iniciarEscena($("#espacio"), S, () => { escenaLista = true; });
 cargarContenido().then(c => {
   C = c; A = c.ajustes;

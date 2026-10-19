@@ -5,35 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Corporación Tame, Historia y Cultura</title>
   <meta name="description" content="Viaja cuatro siglos sin salir de Tame: historia, monumentos, símbolos y memoria viva de Tame, Arauca.">
+  <meta name="theme-color" content="#050505">
   <meta property="og:title" content="Corporación Tame, Historia y Cultura">
   <meta property="og:description" content="Viaja cuatro siglos sin salir de Tame.">
   <meta property="og:image" content="assets/logo.jpeg">
   <link rel="icon" href="assets/logo.jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Tipografías: Ibarra Real Nova (imprenta española del siglo XVIII, la época de las crónicas) y Schibsted Grotesk (textos de interfaz) -->
+  <link href="https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:ital,wght@0,400..700;1,400..700&family=Schibsted+Grotesk:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/movimiento.css">
   <script type="module" src="js/app.js"></script>
 </head>
 <body>
-  <!-- Fondo espacial + emblema 3D (js/escena3d.js) -->
+  <!-- Fondo espacial + reloj de bolsillo 3D (js/escena3d.js) -->
   <canvas id="espacio" aria-hidden="true"></canvas>
 
-  <!-- Precarga -->
-  <div id="precarga" role="status" aria-label="Cargando">
-    <div class="pre-logo">
-      <div class="pre-aro">
-        <span class="pre-progreso"></span>
+  <!-- Pantalla de carga (js/precarga.js): aro-reloj con el logotipo, años 1629 → 2029 y friso que se dibuja solo -->
+  <div id="precarga" role="status" aria-live="polite">
+    <div class="pre-centro">
+      <div class="pre-aro" id="pre-aro" aria-hidden="true">
+        <svg viewBox="0 0 300 300">
+          <circle class="aro-fondo" cx="150" cy="150" r="140"/>
+          <circle class="aro-avance" cx="150" cy="150" r="140" pathLength="1"/>
+          <circle class="aro-interior" cx="150" cy="150" r="114"/>
+          <g class="marcas">
+            <circle class="marca" cx="150" cy="23" r="3.2"/><circle class="marca" cx="213.5" cy="40" r="3.2"/><circle class="marca" cx="260" cy="86.5" r="3.2"/>
+            <circle class="marca" cx="277" cy="150" r="3.2"/><circle class="marca" cx="260" cy="213.5" r="3.2"/><circle class="marca" cx="213.5" cy="260" r="3.2"/>
+            <circle class="marca" cx="150" cy="277" r="3.2"/><circle class="marca" cx="86.5" cy="260" r="3.2"/><circle class="marca" cx="40" cy="213.5" r="3.2"/>
+            <circle class="marca" cx="23" cy="150" r="3.2"/><circle class="marca" cx="40" cy="86.5" r="3.2"/><circle class="marca" cx="86.5" cy="40" r="3.2"/>
+          </g>
+        </svg>
         <span class="pre-img"><img src="assets/logo.jpeg" alt="Corporación Tame, Historia y Cultura"></span>
       </div>
-      <span class="pre-pct">1629</span>
-      <span class="pre-lema">Tame · 400 años de historia</span>
+      <p class="pre-anio" aria-hidden="true"><span id="pre-anio">1629</span></p>
+      <p class="pre-msg" id="pre-msg">Encendiendo las estrellas</p>
+      <figure class="pre-dato" id="pre-dato"><q></q><figcaption id="pre-cita"></figcaption></figure>
+      <div class="pre-puerta" id="pre-puerta" hidden>
+        <button type="button" class="btn-oro luz" data-entrar="si"><span class="btn-txt">Entrar con sonido</span><span class="reloj-son" aria-hidden="true"></span></button>
+        <button type="button" class="btn-texto" data-entrar="no">Entrar en silencio</button>
+      </div>
+      <button type="button" class="btn-texto pre-ya" id="pre-ya" hidden>Entrar ahora</button>
     </div>
+    <div class="pre-friso-caja" aria-hidden="true">
+      <svg class="pre-friso" id="pre-friso" viewBox="0 90 2000 310" preserveAspectRatio="xMidYMax meet"></svg>
+    </div>
+    <p class="pre-pie">Hacia 1629, a orillas del río Tame · dibujo basado en las crónicas de Rivero y Gumilla</p>
   </div>
 
-  <!-- Cortina de viaje entre capítulos -->
-  <div id="viaje" aria-hidden="true">
-    <div><span class="viaje-k">Viajando a · Capítulo</span><b class="viaje-n" id="viaje-n"></b><span class="viaje-linea"></span><span class="viaje-t" id="viaje-t"></span></div>
+  <!-- Portal: transición entre capítulos (js/movimiento.js → atravesar) -->
+  <div id="portal" aria-hidden="true" hidden>
+    <div class="portal-tunel"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="portal-txt">
+      <span class="portal-ico" id="portal-ico"></span>
+      <span class="portal-k" id="portal-k">Capítulo</span>
+      <b class="portal-n" id="portal-n"></b>
+      <span class="portal-t" id="portal-t"></span>
+    </div>
   </div>
 
   <div id="cursor" aria-hidden="true"></div>
@@ -55,23 +84,29 @@
       <button type="button" class="logo-btn" data-ir="inicio" aria-label="Inicio"><img src="assets/logo.jpeg" alt=""></button>
       <button type="button" class="hamburguesa" data-menu="abrir" aria-label="Abrir todas las secciones"><span></span></button>
       <nav aria-label="Capítulos" id="riel-nav"></nav>
+      <button type="button" class="sonido-btn" data-sonido aria-pressed="false" aria-label="Sonido del viaje"></button>
     </aside>
 
     <div class="columna">
       <header class="barra-movil">
         <button type="button" class="logo-btn" data-ir="inicio" aria-label="Inicio"><img src="assets/logo.jpeg" alt=""></button>
-        <button type="button" class="hamburguesa" data-menu="abrir" aria-label="Abrir todas las secciones"><span></span></button>
         <nav aria-label="Capítulos" id="movil-nav"></nav>
+        <button type="button" class="sonido-btn" data-sonido aria-pressed="false" aria-label="Sonido del viaje"></button>
+        <button type="button" class="hamburguesa" data-menu="abrir" aria-label="Abrir todas las secciones"><span></span></button>
       </header>
 
       <!-- Cada capítulo se dibuja aquí desde js/app.js -->
       <main id="vista"></main>
 
+      <!-- Siguiente destino: un reloj que marca la próxima hora del viaje -->
       <div class="siguiente-caja">
-        <button type="button" class="siguiente tilt" id="siguiente">
-          <span class="sig-top"><small></small><span class="sig-riel" id="sig-riel" aria-hidden="true"></span></span>
-          <span class="sig-num" id="sig-num" aria-hidden="true"></span>
-          <span class="sig-abajo"><b data-mask></b><i class="sig-btn" aria-hidden="true"><svg class="sig-aro" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" pathLength="60"/></svg><span>→</span><span>→</span></i></span>
+        <button type="button" class="siguiente luz" id="siguiente" data-forma="redondo">
+          <span class="sig-texto">
+            <small id="sig-k"></small>
+            <b id="sig-t" data-mask></b>
+            <span class="sig-ir"><span class="btn-txt">Cruzar la puerta</span><span id="sig-reloj"></span></span>
+          </span>
+          <span class="sig-dial" id="sig-dial" aria-hidden="true" data-rv></span>
         </button>
       </div>
 
@@ -87,7 +122,7 @@
             <span class="c-flecha" aria-hidden="true"><span>↗</span><span>↗</span></span>
           </a>
           <a class="contacto" id="red-mail" href="#" data-rv>
-            <span class="c-ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></span>
+            <span class="c-ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path class="c-solapa" d="M3.5 6.5 12 13l8.5-6.5"/></svg></span>
             <span class="c-txt"><small>Correo</small><b id="red-mail-t"></b></span>
             <span class="c-flecha" aria-hidden="true"><span>↗</span><span>↗</span></span>
           </a>
