@@ -12,7 +12,7 @@ function pose(S, wide, aspect) {
   const narrowS = Math.min(0.9, Math.max(0.5, halfW / 2.4));
   if (S.page === "inicio") {
     const H = wide ? { xf: 0.5, yf: 0.12, z: 0, s: 1 } : { xf: 0, yf: 0.42, z: 0, s: narrowS };
-    const C = wide ? { xf: 0.3, yf: 0.05, z: -10, s: 1.7 } : { xf: 0, yf: 0.1, z: -12, s: 1.4 };
+    const C = wide ? { xf: 0.66, yf: 0.12, z: -14, s: 1.5 } : { xf: 0, yf: 0.1, z: -12, s: 1.4 };
     const p = easeOut(Math.min(1, scrollY / (innerHeight * 0.9)));
     const o = {}; for (const k in H) o[k] = H[k] + (C[k] - H[k]) * p; return o;
   }

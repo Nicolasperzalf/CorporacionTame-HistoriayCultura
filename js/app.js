@@ -31,6 +31,8 @@ const hace = d => { const n = Math.floor((Date.now() - new Date(d)) / 864e5); re
 const iniciales = a => String(a).replace(/^(Dra?\.|Mg\.|Lic\.|Ing\.|Prof\.)\s*/i, "").split(" ").filter(Boolean).slice(0, 2).map(x => x[0]).join("");
 const PALABRAS = ["Cero", "Un", "Dos", "Tres", "Cuatro", "Cinco", "Seis", "Siete", "Ocho", "Nueve", "Diez", "Once", "Doce", "Trece", "Catorce", "Quince", "Dieciséis", "Diecisiete", "Dieciocho", "Diecinueve", "Veinte"];
 const enPalabras = n => PALABRAS[n] || String(n);
+// Texto de botón que "rueda" al pasar el cursor (la copia de abajo sube y reemplaza a la de arriba)
+const rol = t => `<span class="rol"><span>${t}</span><span aria-hidden="true">${t}</span></span>`;
 
 const S = { // estado compartido con la escena 3D
   page: "inicio", mouse: { x: 0, y: 0, tx: 0, ty: 0 }, scrollVel: 0, boostT: 0, introT0: null,
@@ -65,35 +67,45 @@ V.inicio = () => {
       <h1 aria-label="Viaja cuatro siglos sin salir de Tame.">${pal.map(([w, o], i) => `<span class="pal" aria-hidden="true"><span class="${o ? "oro" : ""}" style="transition-delay:${(1.25 + i * .08).toFixed(2)}s">${w}</span></span>`).join(" ")}</h1>
       <p class="hero-p aparece" style="--d:1.9s">${esc(A.hero_texto)}</p>
       <div class="hero-btns aparece" style="--d:2.05s">
-        <button type="button" class="btn-oro mag" data-scroll="capitulos">Iniciar el viaje <i>↓</i></button>
-        <button type="button" class="btn-vidrio mag" data-ir="aportar">Aportar un recuerdo</button>
+        <button type="button" class="btn-oro mag" data-scroll="capitulos">${rol("Iniciar el viaje")} <i aria-hidden="true"><span>↓</span><span>↓</span></i></button>
+        <button type="button" class="btn-vidrio mag" data-ir="aportar">${rol("Aportar un recuerdo")}</button>
       </div>
     </div>
+    <span class="hero-scroll aparece" style="--d:2.4s" aria-hidden="true"><span></span></span>
   </section>
+  ${franja()}
   <section class="seccion capitulos" id="capitulos" data-screen-label="Capítulos">
-    <div class="cabecera" data-rv>
-      <div><p class="antetitulo">Destinos del viaje</p><h2 class="titulo-2">Seis puertas <em>al tiempo.</em></h2></div>
-      <p class="lead">Cada capítulo es una estación del archivo. Entra por la que prefieras; el viaje continúa en la siguiente.</p>
+    <div class="cabecera">
+      <div><p class="antetitulo" data-rv>Destinos del viaje</p><h2 class="titulo-2" data-mask>Seis puertas <em>al tiempo.</em></h2></div>
+      <p class="lead" data-rv>Cada capítulo es una estación del archivo. Entra por la que prefieras; el viaje continúa en la siguiente.</p>
     </div>
     <div class="rejilla-destinos">${PAGES.slice(1).map((p, i) => `
-      <div data-rv data-rv-delay="${(i % 3) * 120}">
+      <div data-rv>
         <button type="button" class="destino tilt" data-ir="${p.id}">
-          <span class="destino-top"><b>${p.n}</b><small>${esc(kicker(p))}</small></span>
+          <span class="destino-fantasma" aria-hidden="true">${p.n}</span>
+          <span class="destino-top"><b>Capítulo ${p.n}</b><small>${esc(kicker(p))}</small></span>
           <span><span class="d-t">${p.label}</span><span class="d-b">${p.blurb}</span></span>
-          <span class="destino-pie">Viajar <span>→</span></span>
+          <span class="destino-pie">${rol("Viajar")}<span class="flecha" aria-hidden="true"><span>→</span><span>→</span></span></span>
         </button>
       </div>`).join("")}
     </div>
   </section>`;
 };
 
+// Franja de años que se desliza sin fin entre la portada y los capítulos
+function franja() {
+  const anios = [...C.hitos.map(h => [h.anio, h.titulo]), ["2029", "Tame, 400 años"]];
+  const fila = oculta => `<span class="franja-fila"${oculta ? ' aria-hidden="true"' : ""}>${anios.map(([a, t]) => `<span class="franja-item"><b>${esc(a)}</b>${esc(t)}</span>`).join("")}</span>`;
+  return `<div class="franja" role="marquee" aria-label="Hitos de la historia de Tame"><div class="franja-pista">${fila()}${fila(true)}</div></div>`;
+}
+
 // ── I · Quiénes somos ──
 V.nosotros = () => `
   <section class="seccion nosotros" data-screen-label="I · Quiénes somos">
     <div class="nosotros-in">
       <p class="antetitulo" data-rv>Capítulo I · Quiénes somos</p>
-      <h1 class="titulo" data-rv>Un lugar para <em>volver a mirar.</em></h1>
-      <p class="intro" data-rv data-rv-delay="100">${esc(A.nosotros_intro)}</p>
+      <h1 class="titulo" data-mask>Un lugar para <em>volver a mirar.</em></h1>
+      <p class="intro" data-rv>${esc(A.nosotros_intro)}</p>
       <div class="pilares">${[["I", "Misión", A.mision], ["II", "Visión", A.vision], ["III", "Valores", A.valores]].map(([n, t, d]) => `
         <div class="pilar vidrio" data-rv><b>${n}</b><div><h3>${t}</h3><p>${esc(d)}</p></div></div>`).join("")}
       </div>
@@ -114,7 +126,7 @@ V.tribuna = () => {
   <section class="seccion" data-screen-label="II · Tribuna">
     <div class="tribuna-cab vidrio" data-rv>
       <span class="etiqueta">Capítulo II · Columna de opinión</span>
-      <h1>Tribuna de la Memoria</h1>
+      <h1 data-mask>Tribuna de la Memoria</h1>
       <small id="col-ed"></small>
     </div>
     <div class="columna-actual" id="col-actual"></div>
@@ -191,7 +203,7 @@ M.monumentos = () => {
   const sec = $("#mon"); if (!sec) return;
   const L = C.monumentos, txt = $("#mon-txt"), auto = $("#mon-auto");
   let timer;
-  const texto = () => { const m = L[monI]; txt.innerHTML = `<p class="mon-num"><b>${pad(monI + 1)}</b><small>de ${pad(L.length)} · ${esc(m.lugar)}</small></p><h2>${esc(m.titulo)}</h2><p>${esc(m.descripcion)}</p>`; };
+  const texto = () => { const m = L[monI]; txt.innerHTML = `<p class="mon-num"><b>${pad(monI + 1)}</b><small>de ${pad(L.length)} · ${esc(m.lugar)}</small></p><h2>${esc(m.titulo)}</h2><p>${esc(m.descripcion)}</p>`; mascaraViva($("h2", txt)); };
   const etiqueta = () => { auto.textContent = monPausa ? "▶ Reproducir recorrido" : "❚❚ Pausar"; };
   const barras = () => {
     const segs = $$(".mon-segs i", sec);
@@ -233,7 +245,7 @@ V.historia = () => {
   return `
   <section class="seccion historia" data-screen-label="IV · Línea temporal">
     <p class="antetitulo" data-rv>Capítulo IV · Línea temporal ${a0}–${a1}</p>
-    <h1 class="titulo" data-rv>${enPalabras(T.length)} hitos entre la misión y la <em>libertad.</em></h1>
+    <h1 class="titulo" data-mask>${enPalabras(T.length)} hitos entre la misión y la <em>libertad.</em></h1>
     <div class="tl-eje" id="tl-eje">
       <span class="tl-base"></span><span class="tl-oro" id="tl-oro"></span><span class="tl-destello" id="tl-dest" aria-hidden="true"></span>
       ${T.map((h, i) => `<button type="button" class="tl-punto" data-tl="${i}" style="left:${izq(anioNum(h))};--d:${i * 60}ms" aria-label="${esc(h.anio)}"><i></i></button>`).join("")}
@@ -255,10 +267,11 @@ M.historia = () => {
         ${h.imagen ? `<div class="tl-img"><img src="${esc(h.imagen)}" alt="" style="object-position:${esc(h.encuadre || "center")}"></div>` : ""}
         <div class="tl-texto vidrio">
           <p class="meta"><span>Hito ${pad(tlI + 1)} / ${pad(T.length)}</span><span>${esc(h.etapa)}</span></p>
-          <h2>${esc(h.titulo)}</h2><p>${esc(h.texto)}</p>
+          <h2 data-vivo>${esc(h.titulo)}</h2><p>${esc(h.texto)}</p>
           <div class="fila-btns"><button type="button" class="btn-circ" data-tlpaso="-1" aria-label="Hito anterior">←</button><button type="button" class="btn-circ" data-tlpaso="1" aria-label="Hito siguiente">→</button></div>
         </div>
       </div>`;
+    mascaraViva($("[data-vivo]", det));
   };
   const eje = () => {
     const p = ((anioNum(T[tlI]) - a0) / span * 100).toFixed(2) + "%";
@@ -293,11 +306,11 @@ V.publicaciones = () => {
   libI = Math.min(libI, P.length - 1);
   return `
   <section class="seccion" data-screen-label="V · Publicaciones">
-    <div class="cabecera" data-rv>
-      <div><p class="antetitulo">Capítulo V · Publicaciones</p><h1 class="titulo">El territorio <em style="color:var(--perla)">también se lee.</em></h1></div>
-      <div class="pestanas" role="tablist" aria-label="Libros">${P.map((b, i) => `<button type="button" role="tab" class="pestana tilt" data-lib="${i}"><span class="pestana-tapa" aria-hidden="true">${b.portada ? `<img src="${esc(b.portada)}" alt="" loading="lazy">` : ""}</span><span class="pestana-txt"><span class="pestana-tit">${esc(b.titulo)}${b.volumen ? " · " + esc(b.volumen) : ""}</span>${b.tipo ? `<span class="pestana-tipo">${esc(b.tipo)}</span>` : ""}</span></button>`).join("")}</div>
+    <div class="cabecera">
+      <div><p class="antetitulo" data-rv>Capítulo V · Publicaciones</p><h1 class="titulo" data-mask>El territorio <em style="color:var(--perla)">también se lee.</em></h1></div>
+      <div class="pestanas" data-rv role="tablist" aria-label="Libros">${P.map((b, i) => `<button type="button" role="tab" class="pestana tilt" data-lib="${i}"><span class="pestana-tapa" aria-hidden="true">${b.portada ? `<img src="${esc(b.portada)}" alt="" loading="lazy">` : ""}</span><span class="pestana-txt"><span class="pestana-tit">${esc(b.titulo)}${b.volumen ? " · " + esc(b.volumen) : ""}</span>${b.tipo ? `<span class="pestana-tipo">${esc(b.tipo)}</span>` : ""}</span></button>`).join("")}</div>
     </div>
-    <div class="libro-caja vidrio" data-rv data-rv-delay="100">
+    <div class="libro-caja vidrio" data-rv>
       <div class="libro-escena" id="lib-escena">
         <div class="libro-persp" id="lib-persp"></div>
         <span class="libro-sombra" id="lib-sombra" aria-hidden="true"></span>
@@ -334,14 +347,15 @@ M.publicaciones = () => {
     aplicar();
     info.innerHTML = `
       <p class="tipo">${esc(b.tipo)}</p>
-      <h2>${esc(b.titulo)}</h2>
+      <h2 data-vivo>${esc(b.titulo)}</h2>
       ${b.volumen ? `<p class="vol">${esc(b.volumen)}</p>` : ""}
       ${b.subtitulo ? `<p class="sub">${esc(b.subtitulo)}</p>` : ""}
       <p class="ctx">Sobre el libro</p>
       <div class="desc${esVerso ? " verso" : ""}">${parrafos(b.descripcion).map(p => `<p>${esc(p)}</p>`).join("")}</div>
       ${b.autores ? `<p class="autores"><b>${/,| y /.test(b.autores) ? "AUTORES" : "AUTOR"} · </b>${esc(b.autores)}</p>` : ""}
-      <a class="btn-oro" href="${esc(enlaceWa(b.whatsapp || A.whatsapp, `Hola, estoy interesado en comprar el libro «${b.titulo}${b.volumen ? ", " + b.volumen : ""}». ¿Me pueden dar información sobre precio y entrega?`))}" target="_blank" rel="noopener noreferrer">Solicitar ejemplar →</a>`;
+      <a class="btn-oro" href="${esc(enlaceWa(b.whatsapp || A.whatsapp, `Hola, estoy interesado en comprar el libro «${b.titulo}${b.volumen ? ", " + b.volumen : ""}». ¿Me pueden dar información sobre precio y entrega?`))}" target="_blank" rel="noopener noreferrer">${rol("Solicitar ejemplar")} <i aria-hidden="true"><span>→</span><span>→</span></i></a>`;
     $$("[data-lib]").forEach(t => t.setAttribute("aria-selected", +t.dataset.lib === libI));
+    mascaraViva($("[data-vivo]", info));
   };
   const etiqueta = () => { giroBtn.textContent = giro ? "❚❚ Detener giro" : "↻ Girar 360°"; };
   const bucle = () => { if (giro && !arr && !S.reduce) { rot.y += 0.35; aplicar(); } raf = requestAnimationFrame(bucle); };
@@ -382,13 +396,13 @@ M.publicaciones = () => {
 V.aportar = () => `
   <section class="seccion aportar" data-screen-label="VI · Aporte ciudadano">
     <p class="antetitulo" data-rv>Capítulo VI · Viaje en el tiempo</p>
-    <h1 class="titulo" data-rv>Tu recuerdo<br><em>es historia.</em></h1>
+    <h1 class="titulo" data-mask>Tu recuerdo<br><em>es historia.</em></h1>
     <div class="aporte-fila">
       <div class="aporte-info vidrio" data-rv>
         <p>${esc(A.aporte_texto)}</p>
         <ol class="pasos"><li><b>I</b>Envías tu material</li><li><b>II</b>Lo revisamos y verificamos</li><li><b>III</b>Lo preservamos en el archivo</li></ol>
       </div>
-      <form class="formulario vidrio" id="form-aporte" data-rv data-rv-delay="120" novalidate>
+      <form class="formulario vidrio" id="form-aporte" data-rv novalidate>
         <label>Tu nombre<input name="nombre" type="text" autocomplete="name" required placeholder="Nombre y apellido" maxlength="120"></label>
         <label>Correo electrónico<input name="correo" type="email" autocomplete="email" required placeholder="nombre@correo.com" maxlength="160"></label>
         <label class="ancho">Tipo de material
@@ -400,7 +414,7 @@ V.aportar = () => `
         <label class="ancho">Cuéntanos sobre este recuerdo<textarea name="relato" rows="3" maxlength="4000" placeholder="¿Qué historia guarda? ¿Dónde y cuándo fue?"></textarea></label>
         <label class="ancho adjunto">Adjuntar archivo<input name="archivo" type="file" accept="image/*,.pdf,.doc,.docx"><small>JPG, PNG, PDF o Word · máximo 10 MB</small></label>
         <input name="sitio_web" type="text" tabindex="-1" autocomplete="off" class="sr" aria-hidden="true">
-        <div class="ancho enviar"><button type="submit" class="btn-oro">Enviar aporte →</button><p class="estado-form" id="form-estado" role="status" aria-live="polite"></p></div>
+        <div class="ancho enviar"><button type="submit" class="btn-oro">${rol("Enviar aporte")} <i aria-hidden="true"><span>→</span><span>→</span></i></button><p class="estado-form" id="form-estado" role="status" aria-live="polite"></p></div>
       </form>
     </div>
   </section>`;
@@ -436,7 +450,12 @@ function marcarNav() {
   const i = PAGES.findIndex(p => p.id === S.page), sig = PAGES[(i + 1) % PAGES.length], btn = $("#siguiente");
   btn.dataset.ir = sig.id;
   $("small", btn).textContent = sig.id === "inicio" ? "Fin del recorrido · volver" : "Siguiente destino · Capítulo " + sig.n;
-  $("b", btn).textContent = sig.id === "inicio" ? "Regresar al inicio" : sig.label;
+  const b = $("b", btn);
+  b.textContent = sig.id === "inicio" ? "Regresar al inicio" : sig.label;
+  delete b.dataset.mk; b.classList.remove("visto");
+  $("#sig-num").textContent = sig.id === "inicio" ? "XII" : sig.n;
+  $("#sig-riel").innerHTML = PAGES.slice(1).map((p, k) => `<span class="${k < i ? "hecho" : k === i ? "proximo" : ""}" style="--k:${k}"></span>`).join("");
+  document.body.classList.toggle("leyendo", S.page !== "inicio");
 }
 let viajando = false;
 function ir(id) {
@@ -446,7 +465,8 @@ function ir(id) {
   const cambiar = () => { scrollTo({ top: 0, behavior: "instant" }); try { history.replaceState(null, "", "#/" + id); } catch (e) {} S.page = id; render(); };
   if (S.reduce) { cambiar(); return; }
   const p = PAGES.find(x => x.id === id);
-  $("#viaje-n").textContent = p.n; $("#viaje-t").textContent = p.label;
+  for (const [sel, t] of [["#viaje-n", p.n], ["#viaje-t", p.label]]) { const el = $(sel); el.textContent = t; delete el.dataset.mk; enmascarar(el); }
+  void $("#viaje").offsetWidth; // fija el estado inicial para que las palabras suban
   viajando = true; S.boostT = performance.now() / 1000 + 1.6;
   document.body.classList.add("viajando", "saliendo");
   setTimeout(() => {
@@ -460,18 +480,53 @@ function abrirMenu() { $("#menu").hidden = false; document.body.style.overflow =
 function cerrarMenu() { if ($("#menu").hidden) return; $("#menu").hidden = true; document.body.style.overflow = ""; }
 
 /* 4 · EFECTOS ------------------------------------------------ */
+// Revelado con máscara: cada palabra del titular vive en una "ventana" (overflow oculto)
+// y sube desde abajo cuando el titular entra en pantalla. El texto sigue siendo texto
+// real, así que lectores de pantalla y buscadores lo leen igual.
+function enmascarar(el) {
+  if (!el || el.dataset.mk) return el;
+  el.dataset.mk = "1"; let i = 0;
+  const partir = nodo => [...nodo.childNodes].forEach(n => {
+    if (n.nodeType === 3) {
+      const frag = document.createDocumentFragment();
+      n.textContent.split(/(\s+)/).forEach(w => {
+        if (!w) return;
+        if (!w.trim()) { frag.append(" "); return; }
+        const caja = document.createElement("span"), pal = document.createElement("span");
+        caja.className = "mk"; pal.className = "mk-i"; pal.style.setProperty("--i", i++); pal.textContent = w;
+        caja.append(pal); frag.append(caja);
+      });
+      n.replaceWith(frag);
+    } else if (n.nodeType === 1 && n.tagName !== "BR") partir(n);
+  });
+  partir(el); return el;
+}
+// Para titulares que cambian sin salir del capítulo (monumento, hito, libro)
+function mascaraViva(el) {
+  if (!el) return;
+  enmascarar(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("visto")));
+}
+// Movimientos encadenados: lo que entra a la vez en pantalla se revela en orden de lectura
+// (antetítulo → titular palabra a palabra → texto → botones), con 110 ms entre cada paso.
 let io;
 function revelar() {
   io && io.disconnect();
-  if (S.reduce || !("IntersectionObserver" in window)) return;
-  io = new IntersectionObserver(es => es.forEach(en => {
-    if (!en.isIntersecting) return;
-    const el = en.target, d = +(el.dataset.rvDelay || 0);
-    el.style.transitionDelay = d + "ms"; el.classList.remove("oculto");
-    setTimeout(() => { el.style.transitionDelay = ""; }, 1800 + d);
-    io.unobserve(el);
-  }), { threshold: 0.08 });
-  $$("#vista [data-rv]").forEach(el => { el.classList.add("oculto"); io.observe(el); });
+  const els = $$("#vista [data-rv], #vista [data-mask], .siguiente [data-mask], .pie [data-rv], .pie [data-mask]").filter(el => !el.classList.contains("visto"));
+  els.forEach(el => el.hasAttribute("data-mask") && enmascarar(el));
+  if (S.reduce || !("IntersectionObserver" in window)) { els.forEach(el => el.classList.add("visto")); return; }
+  io = new IntersectionObserver(es => {
+    es.filter(en => en.isIntersecting).map(en => en.target)
+      .sort((a, b) => a.compareDocumentPosition(b) & 4 ? -1 : 1)
+      .forEach((el, n) => {
+        const d = Math.min(n, 4) * 110;
+        el.style.setProperty("--d0", d + "ms");
+        el.classList.remove("oculto"); el.classList.add("visto");
+        setTimeout(() => el.style.removeProperty("--d0"), 1600 + d);
+        io.unobserve(el);
+      });
+  }, { threshold: 0.12, rootMargin: "0px 0px -5% 0px" });
+  els.forEach(el => { if (el.hasAttribute("data-rv")) el.classList.add("oculto"); io.observe(el); });
 }
 function efectos() {
   const cursor = $("#cursor"), m = S.mouse, c = { x: -100, y: -100, px: -100, py: -100 };
@@ -487,7 +542,10 @@ function efectos() {
   const bucle = () => { c.x += (c.px - c.x) * .2; c.y += (c.py - c.y) * .2; cursor.style.transform = `translate3d(${c.x.toFixed(1)}px,${c.y.toFixed(1)}px,0)`; requestAnimationFrame(bucle); };
   if (!S.coarse) bucle();
   let ultimo = scrollY;
-  addEventListener("scroll", () => { S.scrollVel = scrollY - ultimo; ultimo = scrollY; }, { passive: true });
+  addEventListener("scroll", () => {
+    S.scrollVel = scrollY - ultimo; ultimo = scrollY;
+    if (S.page === "inicio") document.body.classList.toggle("leyendo", scrollY > innerHeight * .5);
+  }, { passive: true });
 }
 
 /* 5 · ARRANQUE ----------------------------------------------- */
@@ -498,7 +556,7 @@ function construirNav() {
   $("#menu-nav").innerHTML = cap.map(p => `<button type="button" data-ir="${p.id}" data-nav="${p.id}"><b>${p.n}</b><span>${p.label}</span></button>`).join("");
 }
 function pie() {
-  $("#red-wa").href = enlaceWa(A.whatsapp, "Hola, quisiera información sobre la Corporación Tame, Historia y Cultura."); $("#red-wa-t").textContent = "WhatsApp · " + verNumero(A.whatsapp);
+  $("#red-wa").href = enlaceWa(A.whatsapp, "Hola, quisiera información sobre la Corporación Tame, Historia y Cultura."); $("#red-wa-t").textContent = verNumero(A.whatsapp);
   $("#red-mail").href = "mailto:" + A.correo; $("#red-mail").setAttribute("aria-label", "Escribir a " + A.correo); $("#red-mail-t").textContent = A.correo;
   $("#pie-lugar").textContent = A.ubicacion; $("#anio").textContent = new Date().getFullYear();
 }
