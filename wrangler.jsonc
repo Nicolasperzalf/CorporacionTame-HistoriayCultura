@@ -1,10 +1,12 @@
 // Configuración de Cloudflare (Workers con archivos estáticos).
-// Sin este archivo, las vistas previas de ramas («wrangler versions upload») fallan.
+// Sin este archivo, las vistas previas de ramas («wrangler preview») fallan.
 // El sitio sigue siendo estático: Cloudflare sirve la carpeta tal cual, sin compilar nada.
 {
   "name": "corporaciontame-historiaycultura",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "."
-  }
+  },
+  // Necesario para las vistas previas de ramas («npx wrangler preview»); puede ir vacío.
+  "previews": {}
 }
