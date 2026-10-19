@@ -79,12 +79,30 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 98; pointer-event
 .cabecera { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px 48px; margin-bottom: clamp(32px, 4vw, 56px); }
 .lead { margin: 0; max-width: 340px; font-size: 16px; line-height: 1.65; color: var(--texto-2); }
 
-/* Botón principal: cápsula oscura con filo dorado, una luz que sigue el cursor por el borde
-   (css/movimiento.css → .luz) y, a la derecha, un reloj dorado cuya manecilla es la flecha. */
-.btn-oro { position: relative; isolation: isolate; text-decoration: none; display: inline-flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 56px; padding: 0 8px 0 26px; border: 0; border-radius: 999px; background: linear-gradient(180deg, rgba(30, 27, 21, .94), rgba(10, 11, 15, .96)); box-shadow: inset 0 0 0 1px rgba(197, 160, 89, .42), inset 0 1px 0 rgba(255, 255, 255, .07), 0 16px 36px -18px rgba(0, 0, 0, .95); color: var(--perla); font-size: 15px; font-weight: 600; letter-spacing: .01em; white-space: nowrap; transition: box-shadow .4s var(--sale), transform .45s var(--curva-2), scale .16s var(--sale); }
-.btn-oro .reloj { width: 40px; height: 40px; color: var(--noche); background: radial-gradient(circle at 35% 30%, #F1DDB0, var(--oro) 55%, #9C7A3C); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 0 0 1px rgba(0, 0, 0, .35), 0 6px 16px -6px rgba(197, 160, 89, .8); }
-.btn-oro:not(:has(.reloj)) { padding: 0 26px; justify-content: center; }
-@media (hover: hover) { .btn-oro:hover { box-shadow: inset 0 0 0 1px rgba(226, 196, 138, .7), inset 0 1px 0 rgba(255, 255, 255, .08), 0 20px 44px -16px rgba(197, 160, 89, .45); } }
+/* Botones principales = relojes de bolsillo: caja redonda con bisel dorado, asa y corona arriba,
+   esfera con marcas y una manecilla-flecha detrás del texto. La luz del borde (css/movimiento.css → .luz)
+   gira alrededor de la caja siguiendo el cursor. .btn-oro = esfera oscura con filo de oro;
+   .btn-vidrio = esfera clara de cristal. */
+.btn-oro, .btn-vidrio { --tam: clamp(132px, 11vw, 156px); position: relative; isolation: isolate; flex: none; display: inline-grid; place-items: center; width: var(--tam); height: var(--tam); margin-top: 16px; padding: 0 18px; border: 0; border-radius: 50%; text-decoration: none; text-align: center; color: var(--perla); font-size: 13.5px; font-weight: 600; line-height: 1.25; letter-spacing: .01em; white-space: normal; transition: box-shadow .4s var(--sale), transform .45s var(--curva-2), scale .16s var(--sale); }
+.btn-oro { background: radial-gradient(circle at 50% 38%, rgba(40, 35, 26, .98), rgba(10, 11, 15, .98) 70%); box-shadow: inset 0 0 0 2px #9C7A3C, inset 0 0 0 4px rgba(226, 196, 138, .85), inset 0 0 0 6px rgba(10, 11, 15, .9), inset 0 0 22px rgba(0, 0, 0, .8), 0 0 0 1px rgba(0, 0, 0, .5), 0 18px 40px -16px rgba(0, 0, 0, .95), 0 0 34px -12px rgba(197, 160, 89, .55); }
+.btn-vidrio { background: radial-gradient(circle at 38% 30%, rgba(243, 239, 231, .16), rgba(243, 239, 231, .04) 55%, rgba(10, 13, 19, .75)); box-shadow: inset 0 0 0 2px rgba(197, 160, 89, .55), inset 0 0 0 4px rgba(10, 13, 19, .8), inset 0 0 0 5px rgba(243, 239, 231, .22), 0 18px 40px -16px rgba(0, 0, 0, .95); font-weight: 500; }
+/* asa (anillo) y corona del reloj, por encima de la caja */
+.btn-oro::marker, .btn-vidrio::marker { content: none; }
+:is(.btn-oro, .btn-vidrio) > .rol, :is(.btn-oro, .btn-vidrio) > .btn-txt { position: relative; z-index: 2; max-width: 8.5ch; grid-area: 1 / 1; text-shadow: 0 1px 6px rgba(0, 0, 0, .9); }
+:is(.btn-oro, .btn-vidrio) > .reloj { position: absolute; inset: 5%; z-index: 0; width: auto; height: auto; color: var(--oro); background: none; box-shadow: none; }
+:is(.btn-oro, .btn-vidrio) > .reloj .r-aro { opacity: .35; }
+:is(.btn-oro, .btn-vidrio) > .reloj .r-aguja { opacity: .12; stroke-width: 1.4; transition: rotate .9s var(--mueve), opacity .4s; }
+:is(.btn-oro, .btn-vidrio) > .reloj .r-eje { opacity: .3; }
+:is(.btn-oro, .btn-vidrio) > .reloj::before { content: ""; position: absolute; left: 50%; top: -21%; width: 19%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%; box-shadow: 0 0 0 2px var(--oro), inset 0 0 0 1px rgba(0, 0, 0, .4); }
+:is(.btn-oro, .btn-vidrio) > .reloj::after { content: ""; position: absolute; left: 50%; top: -10.5%; width: 10%; height: 6%; translate: -50% 0; border-radius: 3px 3px 1px 1px; background: repeating-linear-gradient(90deg, #E2C48A 0 1.5px, #8B6B3D 1.5px 3px); }
+.btn-vidrio > .reloj { color: var(--perla); }
+.btn-vidrio > .reloj::before { box-shadow: 0 0 0 2px rgba(197, 160, 89, .7); }
+.btn-vidrio > .reloj::after { background: repeating-linear-gradient(90deg, rgba(226, 196, 138, .8) 0 1.5px, rgba(139, 107, 61, .8) 1.5px 3px); }
+@media (hover: hover) {
+  .btn-oro:hover { box-shadow: inset 0 0 0 2px #B48F4A, inset 0 0 0 4px #F1DDB0, inset 0 0 0 6px rgba(10, 11, 15, .9), inset 0 0 22px rgba(0, 0, 0, .7), 0 0 0 1px rgba(0, 0, 0, .5), 0 22px 46px -16px rgba(197, 160, 89, .5), 0 0 44px -10px rgba(197, 160, 89, .6); }
+  .btn-vidrio:hover { color: var(--oro-claro); box-shadow: inset 0 0 0 2px rgba(226, 196, 138, .85), inset 0 0 0 4px rgba(10, 13, 19, .8), inset 0 0 0 5px rgba(243, 239, 231, .3), 0 22px 46px -16px rgba(197, 160, 89, .35); }
+  :is(.btn-oro, .btn-vidrio):hover > .reloj .r-aguja { opacity: .4; }
+}
 /* Botón de texto (secundario discreto) */
 .btn-texto { min-height: 48px; padding: 0 6px; border: 0; background: transparent; color: var(--texto-2); font-size: 15px; text-decoration: underline; text-decoration-color: rgba(197, 160, 89, .5); text-underline-offset: 6px; transition: color .3s, text-decoration-color .3s; }
 .btn-texto:hover { color: var(--oro-claro); text-decoration-color: var(--oro-claro); }
@@ -131,10 +149,6 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 98; pointer-event
 /* 4 · ESTRUCTURA ----------------------------------------------- */
 #espacio { position: fixed; inset: 0; z-index: 0; width: 100vw; height: 100vh; display: block; pointer-events: none; background: radial-gradient(120% 90% at 60% 40%, #0f1522 0%, var(--noche) 45%, var(--fondo) 100%); }
 
-/* Cursor */
-#cursor { position: fixed; left: 0; top: 0; z-index: 99; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 1px solid var(--perla); mix-blend-mode: difference; pointer-events: none; transition: width .35s var(--curva-2), height .35s var(--curva-2), margin .35s var(--curva-2), background .35s; }
-#cursor.sobre { width: 76px; height: 76px; margin: -38px 0 0 -38px; background: var(--perla); }
-@media (pointer: coarse), (max-width: 899px) { #cursor { display: none; } }
 
 /* Aplicación (entra con zoom después de la precarga) */
 .app { position: relative; z-index: 1; display: flex; align-items: flex-start; } /* su entrada con zoom: css/movimiento.css */
@@ -188,13 +202,11 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 98; pointer-event
 .hero .pal { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .1em; }
 .hero .pal .oro { font-style: italic; color: var(--oro); }
 .hero-p { margin: 0 0 28px; max-width: 540px; font-size: clamp(16px, 1.4vw, 18px); line-height: 1.6; color: var(--texto-2); text-wrap: pretty; }
-.hero-btns { display: flex; flex-wrap: wrap; gap: 12px; }
-.hero-btns .btn-vidrio { position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 26px; border-radius: 999px; border: 0; background: rgba(10, 13, 19, .7); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); color: var(--perla); font-size: 15px; font-weight: 500; white-space: nowrap; transition: color .3s, box-shadow .3s, transform .45s var(--curva-2), scale .16s var(--sale); }
-@media (hover: hover) { .hero-btns .btn-vidrio:hover { color: var(--oro-claro); box-shadow: inset 0 0 0 1px rgba(197, 160, 89, .5); } }
+.hero-btns { display: flex; flex-wrap: wrap; gap: 20px; }
 .hero-scroll { position: absolute; right: var(--pad-x); bottom: clamp(32px, 6vh, 64px); width: 1px; height: 72px; background: rgba(255, 255, 255, .14); overflow: hidden; }
 .hero-scroll span { position: absolute; left: 0; top: 0; width: 1px; height: 40%; background: linear-gradient(180deg, transparent, var(--oro-claro)); }
 @media (max-width: 559px) { .hero-scroll { display: none; } }
-@media (max-width: 559px) { .hero-btns > * { flex: 1 1 100%; } }
+
 
 .capitulos { padding-top: clamp(80px, 12vw, 160px); }
 /* Las seis puertas del tiempo: arcos de medio punto (como los de la misión) con un túnel
@@ -208,6 +220,8 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 98; pointer-event
 .tunel { position: absolute; inset: 0; border-radius: inherit; }
 .puerta-ico { position: absolute; left: 50%; top: 64%; width: min(46%, 76px); translate: -50% -50%; color: var(--oro-claro); filter: drop-shadow(0 0 10px rgba(197, 160, 89, .45)); transition: scale .6s var(--sale); }
 .puerta-ico svg { display: block; width: 100%; height: auto; }
+.puerta-ico.con-logo { width: min(52%, 84px); filter: drop-shadow(0 0 14px rgba(197, 160, 89, .5)); }
+.puerta-ico.con-logo img { display: block; width: 100%; aspect-ratio: 1; border-radius: 50%; object-fit: cover; transform: scale(1.02); box-shadow: 0 0 0 1px rgba(226, 196, 138, .7); }
 .puerta-num { font-family: var(--f-numeral); font-weight: 600; font-size: clamp(24px, 2.4vw, 34px); line-height: 1; letter-spacing: .06em; color: var(--oro); }
 .puerta-t { font-family: var(--f-titulo); font-weight: 500; font-size: clamp(17px, 1.55vw, 23px); line-height: 1.12; text-wrap: balance; }
 @media (hover: hover) {
@@ -402,7 +416,6 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 98; pointer-event
 .formulario .adjunto { padding: 18px; border-radius: 14px; border: 1px dashed rgba(197, 160, 89, .5); cursor: pointer; }
 .formulario .adjunto small { font-size: 12px; letter-spacing: .08em; color: var(--gris); }
 .formulario .enviar { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
-.formulario .enviar .btn-oro { min-height: 54px; padding: 0 28px; }
 .formulario .enviar .btn-oro:disabled { opacity: .6; cursor: wait; }
 .estado-form { margin: 0; font-size: 15px; color: var(--oro-claro); }
 .estado-form.error { color: #f0a597; }
@@ -411,12 +424,11 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 98; pointer-event
    (o al pasar el cursor) la manecilla avanza a la hora del siguiente. Al tocarlo, el portal
    se abre desde la esfera. */
 .siguiente-caja { padding: 0 var(--pad-x) clamp(56px, 7vw, 96px); }
-.siguiente { position: relative; isolation: isolate; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 28px clamp(28px, 5vw, 72px); padding: clamp(36px, 4.4vw, 64px) clamp(24px, 4vw, 56px) clamp(28px, 4vw, 56px); border: 0; border-radius: min(50%, 420px) min(50%, 420px) 18px 18px / 56px 56px 18px 18px; background: radial-gradient(640px circle at var(--mx, 85%) var(--my, 50%), rgba(197, 160, 89, .16), transparent 60%), linear-gradient(160deg, rgba(22, 26, 36, .94), rgba(8, 10, 15, .95)); box-shadow: inset 0 0 0 1px rgba(197, 160, 89, .3), 0 50px 90px -50px rgba(0, 0, 0, .95); color: var(--perla); text-align: left; transition: transform .6s var(--curva-2), scale .16s var(--sale); }
+.siguiente { position: relative; isolation: isolate; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 28px clamp(28px, 5vw, 72px); padding: clamp(36px, 4.4vw, 64px) clamp(24px, 4vw, 56px) clamp(28px, 4vw, 56px); border: 0; --corte: clamp(18px, 2.4vw, 30px); color: var(--perla); text-align: left; transition: transform .6s var(--curva-2), scale .16s var(--sale); }
 .sig-texto { display: grid; justify-items: start; gap: clamp(14px, 2vw, 22px); min-width: 0; }
 .siguiente small { font-size: 12px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: var(--oro-claro); }
 .siguiente b { font-family: var(--f-titulo); font-weight: 500; font-size: clamp(40px, 6.2vw, 100px); line-height: 1.02; letter-spacing: -.015em; text-wrap: balance; }
-.sig-ir { display: inline-flex; align-items: center; gap: 14px; margin-top: 6px; padding: 6px 6px 6px 20px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(197, 160, 89, .4); font-size: 15px; font-weight: 600; }
-.sig-ir .reloj { width: 40px; height: 40px; color: var(--noche); background: radial-gradient(circle at 35% 30%, #F1DDB0, var(--oro) 55%, #9C7A3C); }
+.sig-ir { margin-top: 2px; font-size: 15px; font-weight: 600; color: var(--oro-claro); text-decoration: underline; text-decoration-color: rgba(197, 160, 89, .5); text-underline-offset: 7px; }
 .sig-dial { width: clamp(150px, 19vw, 260px); aspect-ratio: 1; border-radius: 50%; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, .6)); }
 .sig-dial svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .sd-bisel { fill: rgba(11, 14, 20, .6); stroke: var(--oro); stroke-width: 2.5; }
@@ -432,7 +444,7 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 98; pointer-event
 .sd-min { stroke-width: 1.6; stroke: var(--oro-claro); }
 .sd-eje { fill: var(--oro); }
 @media (max-width: 639px) {
-  .siguiente { grid-template-columns: 1fr; border-radius: min(50%, 220px) min(50%, 220px) 16px 16px / 40px 40px 16px 16px; }
+  .siguiente { grid-template-columns: 1fr; }
   .sig-dial { order: -1; justify-self: end; width: 128px; margin: -8px 0 -24px; }
 }
 

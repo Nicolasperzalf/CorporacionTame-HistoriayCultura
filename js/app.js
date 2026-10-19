@@ -75,14 +75,14 @@ V.inicio = () => {
       <p class="hero-p aparece" style="--d:1.9s">${esc(A.hero_texto)}</p>
       <div class="hero-btns aparece" style="--d:2.05s">
         <button type="button" class="btn-oro luz mag" data-scroll="capitulos">${rol("Iniciar el viaje")}${reloj(180)}</button>
-        <button type="button" class="btn-vidrio luz mag" data-ir="aportar">${rol("Aportar un recuerdo")}</button>
+        <button type="button" class="btn-vidrio luz mag" data-ir="aportar">${rol("Aportar un recuerdo")}${reloj(0)}</button>
       </div>
     </div>
     <span class="hero-scroll aparece" style="--d:2.4s" aria-hidden="true"><span></span></span>
   </section>
   <section class="seccion capitulos" id="capitulos" data-screen-label="Capítulos">
     <div class="cabecera">
-      <div><p class="antetitulo" data-rv>Destinos del viaje</p><h2 class="titulo-2" data-mask>Seis puertas <em>al tiempo.</em></h2></div>
+      <div><h2 class="titulo-2" data-mask>Seis puertas <em>al tiempo.</em></h2></div>
       <p class="lead" data-rv>Cada capítulo es una hora del reloj y una puerta del archivo. Acércate a una: el tiempo se acelera. Crúzala y viajas.</p>
     </div>
     <ol class="puertas">${PAGES.slice(1).map((p, i) => `
@@ -90,7 +90,7 @@ V.inicio = () => {
         <button type="button" class="puerta luz tilt" data-ir="${p.id}" data-forma="arco" data-hora="${i + 1}" style="--h:${i}">
           <span class="puerta-vano" aria-hidden="true">
             <span class="tunel">${'<i class="anillo"></i>'.repeat(6)}</span>
-            <span class="puerta-ico">${ICONOS[p.id]()}</span>
+            <span class="puerta-ico${p.id === "nosotros" ? " con-logo" : ""}">${p.id === "nosotros" ? `<img src="assets/logo.jpeg" alt="" loading="lazy">` : ICONOS[p.id === "aportar" ? "nosotros" : p.id]()}</span>
           </span>
           <span class="puerta-num" aria-hidden="true">${p.n}</span>
           <span class="puerta-t"><span class="sr">Capítulo ${p.n}: </span>${p.label}</span>
@@ -134,7 +134,6 @@ V.tribuna = () => {
   return `
   <section class="seccion" data-screen-label="II · Tribuna">
     <div class="tribuna-cab vidrio" data-rv>
-      <span class="etiqueta">Capítulo II · Columna de opinión</span>
       <h1 data-mask>Tribuna de la Memoria</h1>
       <small id="col-ed"></small>
     </div>
@@ -512,20 +511,17 @@ function abrirMenu() { $("#menu").hidden = false; document.body.style.overflow =
 function cerrarMenu() { if ($("#menu").hidden) return; $("#menu").hidden = true; document.body.style.overflow = ""; }
 
 /* 4 · EFECTOS ------------------------------------------------ */
-// (Revelados, luces, puertas y portal: js/movimiento.js.) Aquí: cursor, imán, inclinación y scroll.
+// (Revelados, luces, puertas y portal: js/movimiento.js.) Aquí: imán, inclinación y scroll.
 function efectos() {
-  const cursor = $("#cursor"), m = S.mouse, c = { x: -100, y: -100, px: -100, py: -100 };
+  const m = S.mouse;
   addEventListener("pointermove", e => {
-    m.tx = e.clientX / innerWidth * 2 - 1; m.ty = e.clientY / innerHeight * 2 - 1; c.px = e.clientX; c.py = e.clientY;
+    m.tx = e.clientX / innerWidth * 2 - 1; m.ty = e.clientY / innerHeight * 2 - 1;
     if (S.reduce || S.coarse) return;
     const mag = e.target.closest?.(".mag"), tilt = e.target.closest?.(".tilt");
     if (mag) { const r = mag.getBoundingClientRect(); mag.style.transform = `translate(${((e.clientX - r.left - r.width / 2) * .22).toFixed(1)}px,${((e.clientY - r.top - r.height / 2) * .35).toFixed(1)}px)`; }
     if (tilt) { const r = tilt.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; tilt.style.setProperty("--mx", x + "px"); tilt.style.setProperty("--my", y + "px"); tilt.style.transform = `perspective(1400px) rotateX(${((y / r.height - .5) * -5).toFixed(2)}deg) rotateY(${((x / r.width - .5) * 6).toFixed(2)}deg)`; }
   }, { passive: true });
   addEventListener("pointerout", e => { const el = e.target.closest?.(".mag,.tilt"); if (el && !el.contains(e.relatedTarget)) el.style.transform = ""; });
-  addEventListener("pointerover", e => cursor.classList.toggle("sobre", !!e.target.closest?.("a,button")), { passive: true });
-  const bucle = () => { c.x += (c.px - c.x) * .2; c.y += (c.py - c.y) * .2; cursor.style.transform = `translate3d(${c.x.toFixed(1)}px,${c.y.toFixed(1)}px,0)`; requestAnimationFrame(bucle); };
-  if (!S.coarse) bucle();
   let ultimo = scrollY;
   addEventListener("scroll", () => {
     S.scrollVel = scrollY - ultimo; ultimo = scrollY;
@@ -543,7 +539,6 @@ function construirNav() {
   $("#movil-nav").innerHTML = cap.map(p => `<button type="button" data-ir="${p.id}" data-nav="${p.id}" data-forma="circulo" aria-label="${p.label}">${p.n}</button>`).join("");
   $("#menu-nav").innerHTML = cap.map(p => `<button type="button" data-ir="${p.id}" data-nav="${p.id}"><b>${p.n}</b><span class="menu-ico">${ICONOS[p.id]()}</span><span>${p.label}</span></button>`).join("");
   $("#sig-dial").dataset.forma = "circulo";
-  $("#sig-reloj").outerHTML = reloj(90);
   enmascarar($("#portal-t"));
 }
 // Botón de sonido (barra lateral y barra del celular): las ondas se mueven cuando está activo
@@ -572,6 +567,7 @@ function eventos() {
 
 let escenaLista = false, contenidoListo = false;
 $$("[data-sonido], .reloj-son").forEach(b => { b.innerHTML = ondas(); });
+$$('[data-entrar="si"]').forEach(b => b.insertAdjacentHTML("beforeend", reloj(180)));
 iniciarPrecarga({
   estado: () => ({ contenido: contenidoListo, escena: escenaLista }),
   reduce: S.reduce,

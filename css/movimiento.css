@@ -143,10 +143,13 @@
 .pre-img img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.14); }
 .pre-anio { margin: clamp(14px, 2.4vh, 24px) 0 0; font-family: var(--f-numeral); font-weight: 600; font-size: clamp(46px, 8vh, 78px); line-height: 1; letter-spacing: .04em; font-variant-numeric: lining-nums tabular-nums; background: linear-gradient(180deg, #F6E7C4, var(--oro) 70%, var(--bronce)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .pre-puerta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 18px; margin-top: 18px; animation: aparecer .8s ease; }
-.pre-puerta .btn-oro { padding-left: 24px; }
+.pre-puerta .btn-oro { display: inline-grid; gap: 6px; align-content: center; }
+.pre-puerta .btn-oro .btn-txt { max-width: 10ch; position: relative; z-index: 2; }
+.pre-puerta .btn-oro .reloj-son { position: relative; z-index: 2; width: 22px; height: 22px; }
 .pre-aviso { flex: 0 0 100%; margin: 0 0 6px; text-align: center; font-size: 14px; line-height: 1.5; color: var(--texto-2); text-wrap: balance; }
-.reloj-son { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; color: var(--noche); background: radial-gradient(circle at 35% 30%, #F1DDB0, var(--oro) 55%, #9C7A3C); }
+.reloj-son { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: var(--oro); grid-area: auto !important; }
 .reloj-son svg { width: 20px; height: 20px; }
+.pre-puerta .btn-oro > .btn-txt { grid-area: auto; }
 .pre-friso-caja { position: relative; height: clamp(140px, 27vh, 290px); overflow: hidden; -webkit-mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); transition: opacity .8s ease, translate 1.2s var(--sale); }
 .pre-friso { display: block; height: 100%; width: auto; max-width: none; margin: 0 auto; overflow: visible; will-change: transform; }
 .pre-friso path { fill: none; stroke: var(--oro); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
