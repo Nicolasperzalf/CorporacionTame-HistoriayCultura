@@ -1,0 +1,5 @@
+# Archivos que Cloudflare NO debe publicar
+.git
+wrangler.jsonc
+.assetsignore
+.wrangler
