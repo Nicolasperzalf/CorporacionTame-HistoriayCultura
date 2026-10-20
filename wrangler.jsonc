@@ -1,4 +1,5 @@
 // Configuración de Cloudflare (Workers con archivos estáticos).
+// Sin este archivo, las vistas previas de ramas («wrangler preview») fallan.
 // El sitio sigue siendo estático: Cloudflare sirve la carpeta tal cual, sin compilar nada.
 {
   "name": "corporaciontame-historiaycultura",
@@ -6,8 +7,6 @@
   "assets": {
     "directory": "."
   },
-  // Único acceso público: el dominio propio (corporaciontamehistoriaycultura.co, conectado en Cloudflare).
-  // Se apagan la dirección *.workers.dev y los enlaces de vista previa de cada versión o rama.
-  "workers_dev": false,
-  "preview_urls": false
+  // Necesario para las vistas previas de ramas («npx wrangler preview»); puede ir vacío.
+  "previews": {}
 }

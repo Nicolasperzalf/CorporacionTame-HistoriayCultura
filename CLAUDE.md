@@ -3,7 +3,7 @@
 Este repositorio ES el sitio en producción (GitHub Pages, rama `main`, raíz `/`).
 Sitio estático sin build: HTML + CSS + JavaScript (módulos ES). No agregar frameworks, npm ni pasos de compilación.
 Publicado en: https://corporaciontamehistoriaycultura.co/ (ÚNICO acceso, dominio propio en Cloudflare) · Panel: `/admin`.
-Las direcciones viejas (`*.github.io`, `*.workers.dev`) redirigen al dominio (script al inicio de `index.html` y `admin/index.html`); `wrangler.jsonc` apaga `workers_dev` y `preview_urls`, así que no hay vista previa pública: probar en local.
+Las direcciones viejas (`*.github.io`, `*.workers.dev`) redirigen al dominio (script al inicio de `index.html` y `admin/index.html`). Por eso las vistas previas de rama también saltan al dominio: probar en local. (Apagar `workers_dev`/`preview_urls` en `wrangler.jsonc` hace fallar las compilaciones de rama de Cloudflare; no hacerlo.)
 
 ## Cómo trabajar
 - El dueño no es programador: explica en español, breve y sin jerga.
