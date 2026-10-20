@@ -34,8 +34,9 @@ Publicado en: https://nicolasperzalf.github.io/CorporacionTame-HistoriayCultura/
 - Tipos: Ibarra Real Nova (titulares y numerales; imprenta española del s. XVIII), Schibsted Grotesk (UI, ≥12px). Cuadros/placas: Cormorant Garamond (títulos) y Marcellus (números).
 - Cuadros (`.vidrio`) = placas de archivo con esquinas cortadas (clip-path), sin desenfoque de fondo (rendimiento).
 - Sin rótulos «Capítulo X · Nombre» en las secciones ni en el portal (solo ícono y numeral).
-- Movimiento: capítulos = «puertas del tiempo» (arco de misión con túnel); botones principales (`.btn-oro`, `.btn-vidrio`) = relojes de bolsillo redondos (asa, corona, esfera con marcas y aguja), con luz de borde que sigue el cursor; «Siguiente destino» = placa de esquinas cortadas con una esfera cuya aguja avanza a la hora del próximo capítulo. Sin franja de fechas, sin cursor personalizado.
-- Puertas: la I (Quiénes somos) lleva el logotipo; la VI (Aporte ciudadano) lleva el ícono de líneas que antes tenía la I.
+- Movimiento: capítulos = «puertas del tiempo» (arco de misión con túnel); botones principales (`.btn-oro`, `.btn-vidrio`) = siluetas de reloj de bolsillo (círculo con asa y corona, SIN marcas ni aguja), con luz de borde que sigue el cursor; «Siguiente destino» = placa de esquinas cortadas con una esfera cuya aguja avanza a la hora del próximo capítulo (sin texto «Cruzar la puerta»).
+- Monumentos: la foto se ve completa (contain) y aparece abriéndose desde el centro; el texto va algo desvanecido con sombra para leerse. Sin franja de fechas, sin cursor personalizado.
+- Puertas: la I (Quiénes somos) lleva el logotipo recortado sin el borde blanco y con más contraste; la VI (Aporte ciudadano) lleva el ícono de líneas que antes tenía la I.
 - Friso de carga: basado en Rivero y Gumilla y en el informe `investigacion/reports/Pueblos indígenas de Tame siglo XVII.md` de la carpeta del proyecto. Sin penachos, flautas sagradas ni imágenes de los U'wa; los pueblos siguen vivos (makaguán, hitnü, sikuani).
 - Tono: serio, territorial, respetuoso con la memoria local. Sin emojis.
 - 6 capítulos: I Quiénes somos · II Tribuna de la Memoria · III Salón de monumentos · IV Línea temporal · V Publicaciones · VI Aporte ciudadano.
