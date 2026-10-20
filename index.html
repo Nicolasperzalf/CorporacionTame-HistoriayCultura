@@ -2,13 +2,17 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
+  <!-- Único acceso: el dominio propio. Si alguien entra por la dirección vieja de GitHub o de Cloudflare, se le lleva allá. -->
+  <script>(function (d, h) { if (/\.github\.io$|\.workers\.dev$/i.test(h)) location.replace("https://" + d + (location.pathname.replace(/^\/CorporacionTame-HistoriayCultura/i, "") || "/") + location.search + location.hash); })("corporaciontamehistoriaycultura.co", location.hostname);</script>
+  <link rel="canonical" href="https://corporaciontamehistoriaycultura.co/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Corporación Tame, Historia y Cultura</title>
   <meta name="description" content="Viaja cuatro siglos sin salir de Tame: historia, monumentos, símbolos y memoria viva de Tame, Arauca.">
   <meta name="theme-color" content="#050505">
   <meta property="og:title" content="Corporación Tame, Historia y Cultura">
   <meta property="og:description" content="Viaja cuatro siglos sin salir de Tame.">
-  <meta property="og:image" content="assets/logo.jpeg">
+  <meta property="og:image" content="https://corporaciontamehistoriaycultura.co/assets/logo.jpeg">
+  <meta property="og:url" content="https://corporaciontamehistoriaycultura.co/">
   <link rel="icon" href="assets/logo.jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +46,7 @@
       <p class="pre-anio" aria-hidden="true"><span id="pre-anio">1629</span></p>
       <p class="sr" id="pre-msg">Cargando</p>
       <div class="pre-puerta" id="pre-puerta" hidden>
-        <p class="pre-aviso">Este viaje tiene sonido: arpa llanera y el Llano abierto. Puedes apagarlo cuando quieras.</p>
+        <p class="pre-aviso">Este viaje tiene sonido: el espacio profundo y un cuatro llanero. Puedes apagarlo cuando quieras.</p>
         <button type="button" class="btn-oro luz" data-entrar="si"><span class="btn-txt">Entrar con sonido</span><span class="reloj-son" aria-hidden="true"></span></button>
         <button type="button" class="btn-texto" data-entrar="no">Entrar en silencio</button>
       </div>

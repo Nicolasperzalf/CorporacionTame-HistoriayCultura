@@ -481,7 +481,7 @@ function marcarNav() {
   document.body.classList.toggle("leyendo", S.page !== "inicio");
 }
 // Viajar a un capítulo: el elemento tocado (puerta, reloj, botón) se abre como portal (js/movimiento.js),
-// las estrellas del fondo aceleran, suena el soplo del viaje y, al llegar, el arpa.
+// las estrellas del fondo aceleran, suena un golpe de joropo en el cuatro y, al llegar, el acorde del capítulo.
 let viajando = false;
 function ir(id, origen) {
   if (!PAGES.some(p => p.id === id) || viajando) return;
@@ -494,7 +494,7 @@ function ir(id, origen) {
   const cambiar = () => { scrollTo({ top: 0, behavior: "instant" }); if (location.hash === hashIni || location.hash === "#/" + id) try { history.replaceState(null, "", "#/" + id); } catch (e) {} S.page = id; render(); };
   viajando = true; S.empuje = 0;
   S.boostT = performance.now() / 1000 + (TIEMPOS.abre + TIEMPOS.mantiene + TIEMPOS.cruza) / 1000;
-  sonido.viaje((TIEMPOS.abre + TIEMPOS.mantiene) / 1000);
+  sonido.viaje((TIEMPOS.abre + TIEMPOS.mantiene) / 1000, n);
   atravesar({
     origen: desdeMenu ? null : origen, cambiar,
     antes: inicio ? "Regreso al" : "Capítulo", numeral: inicio ? "XII" : p.n, titulo: inicio ? "Inicio" : p.label,
@@ -574,7 +574,7 @@ iniciarPrecarga({
   alEntrar: conSonido => {
     S.introT0 = performance.now() / 1000 - (S.reduce ? 10 : 0);
     document.body.classList.add("intro");
-    // La entrada con sonido: el soplo acompaña el zoom de entrada y el arpa da la bienvenida
+    // La entrada con sonido: el cuatro acompaña el zoom de entrada y da la bienvenida
     if (conSonido) sonido.activar(true).then(() => { pintarSonido(); sonido.viaje(1.4); setTimeout(() => sonido.llegada(0), 1300); });
     pintarSonido();
   }

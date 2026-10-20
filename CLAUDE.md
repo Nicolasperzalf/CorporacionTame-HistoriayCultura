@@ -2,7 +2,8 @@
 
 Este repositorio ES el sitio en producción (GitHub Pages, rama `main`, raíz `/`).
 Sitio estático sin build: HTML + CSS + JavaScript (módulos ES). No agregar frameworks, npm ni pasos de compilación.
-Publicado en: https://nicolasperzalf.github.io/CorporacionTame-HistoriayCultura/ · Panel: `/admin`.
+Publicado en: https://corporaciontamehistoriaycultura.co/ (ÚNICO acceso, dominio propio en Cloudflare) · Panel: `/admin`.
+Las direcciones viejas (`*.github.io`, `*.workers.dev`) redirigen al dominio (script al inicio de `index.html` y `admin/index.html`). Por eso las vistas previas de rama también saltan al dominio: probar en local. (Apagar `workers_dev`/`preview_urls` en `wrangler.jsonc` hace fallar las compilaciones de rama de Cloudflare; no hacerlo.)
 
 ## Cómo trabajar
 - El dueño no es programador: explica en español, breve y sin jerga.
@@ -16,7 +17,7 @@ Publicado en: https://nicolasperzalf.github.io/CorporacionTame-HistoriayCultura/
 - `js/app.js` — capítulos (`PAGES`), navegación `#/id`, libros 3D (Cap. V), formulario (Cap. VI) y arranque.
 - `js/movimiento.js` — motor de movimiento compartido: `TIEMPOS`/`CURVA`, `revelar` (máscaras y trazos encadenados), luz de borde que sigue el cursor con chispas (`.luz`), `animarPuertas` (túnel que acelera), `atravesar` (portal que crece desde lo pulsado y une la salida de un capítulo con la entrada del siguiente).
 - `js/precarga.js` — pantalla de carga SIN textos: aro-reloj con el logo, años 1629→2029 y friso de línea (caney, canoa, conuco, morichal) que se dibuja según el avance real; al final, aviso de que el sitio tiene sonido y puerta «Entrar con sonido / en silencio».
-- `js/sonido.js` — sonido sintetizado (Web Audio, sin archivos): fondo de Llano abierto (brisa y cantos de aves) y arpa llanera al cruzar y llegar. Sin tic-tac, grillos ni bordón. Solo con permiso; se recuerda en `localStorage` (`tame-sonido`).
+- `js/sonido.js` — sonido sintetizado (Web Audio, sin archivos): fondo de espacio profundo (acorde grave que respira, polvo cósmico, destellos con eco) y cuatro llanero sintetizado (afinación real La-Re-Fa#-Si): rasgueo al acercarse a una puerta, golpe de joropo al cruzar, acorde del capítulo al llegar. Sin arpa, aves, tic-tac ni grillos. Solo con permiso; se recuerda en `localStorage` (`tame-sonido`).
 - `js/iconos.js` — íconos de línea por capítulo (se dibujan solos) y los relojes de los botones.
 - Cloudflare: `wrangler.jsonc` (vistas previas de ramas), `_headers` (seguridad y caché), `.assetsignore` (lo que no se publica).
 - `js/escena3d.js` — fondo three.js (three@0.184.0 por import dinámico): estrellas warp + reloj de bolsillo dorado; el logotipo es la esfera; las manecillas marcan la hora del capítulo (Inicio = XII, I…VI).
