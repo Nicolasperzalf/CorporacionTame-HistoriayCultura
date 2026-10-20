@@ -83,7 +83,6 @@ V.inicio = () => {
   <section class="seccion capitulos" id="capitulos" data-screen-label="Capítulos">
     <div class="cabecera">
       <div><h2 class="titulo-2" data-mask>Seis puertas <em>al tiempo.</em></h2></div>
-      <p class="lead" data-rv>Cada capítulo es una hora del reloj y una puerta del archivo. Acércate a una: el tiempo se acelera. Crúzala y viajas.</p>
     </div>
     <ol class="puertas">${PAGES.slice(1).map((p, i) => `
       <li data-rv>
