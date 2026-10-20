@@ -3,9 +3,9 @@
 //  Fondo: espacio profundo (un pulso grave que respira, polvo
 //  cósmico y destellos lejanos con eco).
 //  Cuatro llanero: el instrumento de cuerdas del joropo, afinado como
-//  el real (La-Re-Fa#-Si, la cuarta cuerda aguda). Rasgueo corto al
-//  acercarse a una puerta, golpe de joropo al cruzarla y un acorde
-//  que queda sonando al llegar. Cada capítulo es un acorde en re mayor.
+//  el real (La-Re-Fa#-Si, la cuarta cuerda aguda). SOLO suena en las
+//  seis puertas del inicio: un rasgueo corto al acercarse a cada una
+//  (cada capítulo es un acorde en re mayor). En el resto, solo el espacio.
 //  Solo suena si la persona lo elige; la elección se recuerda.
 // ==========================================================
 const CLAVE = "tame-sonido";
@@ -168,21 +168,9 @@ export const sonido = {
     document.documentElement.classList.add("con-sonido");
   },
 
-  // Cruce de puerta: un golpe de joropo (abajo, chasquido, arriba, abajo…) que acelera con el portal
-  viaje(duracion = 1.2, n = 0) {
-    if (!activo) return;
-    const t = ctx.currentTime + 0.02, golpe = Math.min(0.15, duracion / 8);
-    [["abajo", 0], ["abajo", 1], ["arriba", 0], ["abajo", 0], ["abajo", 1], ["arriba", 0]].forEach(([dir, ch], i) =>
-      rasgueo(n, t + i * golpe, { arriba: dir === "arriba", g: 0.1 + i * 0.012, corta: ch ? 0.06 : 0 }));
-  },
-
-  // Llegada a un capítulo: su acorde, rasgueado y dejado sonar, con una nota que canta arriba
-  llegada(n = 0) {
-    if (!activo) return;
-    const t = ctx.currentTime + 0.02, notas = posicion(n);
-    rasgueo(n, t, { g: 0.2, abre: 0.022 });
-    pulsar(Math.max(...notas) * 2, t + 0.32, 0.08, 0.3);
-  },
+  // Cruce de puerta y llegada: solo el espacio, sin instrumentos (el cuatro suena únicamente en las puertas del inicio)
+  viaje() {},
+  llegada() {},
 
   // Al acercarse a una puerta: un rasgueo corto y suave de su acorde
   nota(n = 0) {
