@@ -481,7 +481,7 @@ function marcarNav() {
   document.body.classList.toggle("leyendo", S.page !== "inicio");
 }
 // Viajar a un capítulo: el elemento tocado (puerta, reloj, botón) se abre como portal (js/movimiento.js),
-// las estrellas del fondo aceleran, suena un golpe de joropo en el cuatro y, al llegar, el acorde del capítulo.
+// las estrellas del fondo aceleran, y se oye solo el espacio de fondo.
 let viajando = false;
 function ir(id, origen) {
   if (!PAGES.some(p => p.id === id) || viajando) return;
@@ -574,7 +574,7 @@ iniciarPrecarga({
   alEntrar: conSonido => {
     S.introT0 = performance.now() / 1000 - (S.reduce ? 10 : 0);
     document.body.classList.add("intro");
-    // La entrada con sonido: el cuatro acompaña el zoom de entrada y da la bienvenida
+    // La entrada con sonido: arranca el fondo del espacio
     if (conSonido) sonido.activar(true).then(() => { pintarSonido(); sonido.viaje(1.4); setTimeout(() => sonido.llegada(0), 1300); });
     pintarSonido();
   }
