@@ -67,9 +67,11 @@ const V = {}, M = {}; // V = HTML de cada capítulo · M = comportamiento al mon
 // ── Inicio ──
 V.inicio = () => {
   const pal = [["Viaja"], ["cuatro", 1], ["siglos", 1], ["sin"], ["salir"], ["de"], ["Tame."]];
+  const ult = C.columnas[0];
   return `
   <section class="hero" data-screen-label="Inicio">
     <div class="hero-txt">
+      ${ult ? `<button type="button" class="hero-aviso aparece" style="--d:1s" data-ir="tribuna"><small>Nueva en la Tribuna</small><b>${esc(ult.titulo)}</b><span class="hero-aviso-f" aria-hidden="true">→</span></button>` : ""}
       <h1 aria-label="Viaja cuatro siglos sin salir de Tame.">${pal.map(([w, o], i) => `<span class="pal" aria-hidden="true"><span class="${o ? "oro" : ""}" style="transition-delay:${(1.25 + i * .08).toFixed(2)}s">${w}</span></span>`).join(" ")}</h1>
       <p class="hero-p aparece" style="--d:1.9s">${esc(A.hero_texto)}</p>
       <div class="hero-btns aparece" style="--d:2.05s">
@@ -92,12 +94,50 @@ V.inicio = () => {
           </span>
           <span class="puerta-num" aria-hidden="true">${p.n}</span>
           <span class="puerta-t"><span class="sr">Capítulo ${p.n}: </span>${p.label}</span>
+          ${metaPuerta(p.id) ? `<span class="puerta-meta">${metaPuerta(p.id)}</span>` : ""}
         </button>
       </li>`).join("")}
     </ol>
+    <dl class="cifras" data-rv>${cifras().map(([n, t]) => `
+      <div class="cifra"><dt>${t}</dt><dd data-cuenta="${n}">${n.toLocaleString("es-CO")}</dd></div>`).join("")}
+    </dl>
   </section>`;
 };
+// Lo que guarda cada puerta, en una línea (como la etiqueta de una ficha de archivo)
+const cuenta = (n, uno, varios) => n ? `${n} ${n === 1 ? uno : varios}` : "";
+function metaPuerta(id) {
+  if (id === "nosotros") return "Misión y visión";
+  if (id === "tribuna") return cuenta(C.columnas.length, "columna", "columnas");
+  if (id === "monumentos") return cuenta(C.monumentos.length, "monumento", "monumentos");
+  if (id === "historia") return cuenta(C.hitos.length, "hito", "hitos");
+  if (id === "publicaciones") return cuenta(C.publicaciones.length, "libro", "libros");
+  if (id === "aportar") return "Archivo abierto";
+  return "";
+}
+// Dos cifras del viaje (lo que hay en cada puerta ya lo dice su etiqueta): de la fundación (1629) a los 400 años de Tame (18 de febrero de 2029)
+const FUNDACION = 1629, CUATROCIENTOS = new Date("2029-02-18T00:00:00-05:00");
+function cifras() {
+  const hoy = new Date(), dias = Math.ceil((CUATROCIENTOS - hoy) / 864e5);
+  const L = [[hoy.getFullYear() - FUNDACION, "años desde la fundación"]];
+  if (dias > 0) L.push([dias, "días para los 400 años"]);
+  return L;
+}
+// Las cifras cuentan desde cero cuando aparecen (sin movimiento si la persona lo pidió)
+function contar(raiz) {
+  const els = $$("[data-cuenta]", raiz); if (!els.length || S.reduce) return () => {};
+  const fmt = n => n.toLocaleString("es-CO");
+  els.forEach(el => { el.textContent = "0"; });
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return; io.unobserve(e.target);
+    const el = e.target, fin = +el.dataset.cuenta, t0 = performance.now(), dur = 1400;
+    const paso = t => { const k = Math.min(1, (t - t0) / dur), v = 1 - Math.pow(1 - k, 4); el.textContent = fmt(Math.round(fin * v)); if (k < 1) requestAnimationFrame(paso); };
+    requestAnimationFrame(paso);
+  }), { threshold: .6 });
+  els.forEach(el => io.observe(el));
+  return () => io.disconnect();
+}
 M.inicio = () => {
+  alSalir(contar($("#vista")));
   // Al acercarse a una puerta: su túnel acelera, las estrellas del fondo también y su ícono se redibuja
   alSalir(animarPuertas($("#vista"), p => {
     S.empuje = 1; redibujar($(".puerta-ico svg", p));
@@ -531,11 +571,12 @@ function construirNav() {
   const cap = PAGES.slice(1);
   $("#riel-nav").innerHTML = cap.map(p => `<button type="button" class="riel-btn" data-ir="${p.id}" data-nav="${p.id}" data-forma="circulo" aria-label="${p.label}"><span>${p.n}</span><span class="riel-nombre" aria-hidden="true">${p.label}</span></button>`).join("");
   $("#movil-nav").innerHTML = cap.map(p => `<button type="button" data-ir="${p.id}" data-nav="${p.id}" data-forma="circulo" aria-label="${p.label}">${p.n}</button>`).join("");
-  $("#menu-nav").innerHTML = cap.map(p => `<button type="button" data-ir="${p.id}" data-nav="${p.id}"><b>${p.n}</b><span class="menu-ico">${ICONOS[p.id]()}</span><span>${p.label}</span></button>`).join("");
+  $("#menu-nav").innerHTML = cap.map(p => `<button type="button" data-ir="${p.id}" data-nav="${p.id}"><b>${p.n}</b><span class="menu-ico">${ICONOS[p.id]()}</span><span class="menu-txt"><span>${p.label}</span><small>${p.blurb}</small></span></button>`).join("");
   $("#sig-dial").dataset.forma = "circulo";
   enmascarar($("#portal-t"));
 }
 function pie() {
+  $("#pie-mapa").innerHTML = PAGES.slice(1).map(p => `<li><button type="button" data-ir="${p.id}"><b>${p.n}</b>${p.label}</button></li>`).join("");
   $("#red-wa").href = enlaceWa(A.whatsapp, "Hola, quisiera información sobre la Corporación Tame, Historia y Cultura."); $("#red-wa-t").textContent = verNumero(A.whatsapp);
   $("#red-mail").href = "mailto:" + A.correo; $("#red-mail").setAttribute("aria-label", "Escribir a " + A.correo); $("#red-mail-t").textContent = A.correo;
   $("#pie-lugar").textContent = A.ubicacion; $("#anio").textContent = new Date().getFullYear();

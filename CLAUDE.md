@@ -41,6 +41,7 @@ Las direcciones viejas (`*.github.io`, `*.workers.dev`) redirigen al dominio (sc
 - Puertas: la I (Quiénes somos) lleva el logotipo recortado sin el borde blanco y con más contraste; la VI (Aporte ciudadano) lleva el ícono de líneas que antes tenía la I.
 - Celular: en los capítulos el reloj 3D se retira a la esquina superior; en Monumentos la foto va arriba y el texto debajo; en Publicaciones los botones de vista van debajo del libro.
 - Friso de carga: basado en Rivero y Gumilla y en el informe `investigacion/reports/Pueblos indígenas de Tame siglo XVII.md` de la carpeta del proyecto. Sin penachos, flautas sagradas ni imágenes de los U'wa; los pueblos siguen vivos (makaguán, hitnü, sikuani).
+- Señales de contenido (análisis de 30x.com, 2026-11-04): en Inicio un aviso con la última columna de la Tribuna, una etiqueta bajo cada puerta (p. ej. «9 monumentos»), dos cifras (años desde 1629 y días para los 400 años, 18-feb-2029); el menú lleva la reseña de cada capítulo y el pie el recorrido completo.
 - Tono: serio, territorial, respetuoso con la memoria local. Sin emojis.
 - 6 capítulos: I Quiénes somos · II Tribuna de la Memoria · III Salón de monumentos · IV Línea temporal · V Publicaciones · VI Aporte ciudadano.
 
