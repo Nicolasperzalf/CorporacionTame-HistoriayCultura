@@ -17,7 +17,7 @@ export const CURVA = {
   sale: "cubic-bezier(.23, 1, .32, 1)",     // entradas y respuestas: arranca rápido, frena suave
   mueve: "cubic-bezier(.77, 0, .175, 1)"    // desplazamientos en pantalla: acelera y frena
 };
-// Tiempos del cruce entre capítulos (en milisegundos). El sonido y el reloj 3D se sincronizan con ellos.
+// Tiempos del cruce entre capítulos (en milisegundos). El reloj 3D se sincroniza con ellos.
 export const TIEMPOS = { abre: 680, mantiene: 420, cruza: 700 };
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 const $ = (s, r = document) => r.querySelector(s);

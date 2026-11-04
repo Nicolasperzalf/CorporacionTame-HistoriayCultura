@@ -79,11 +79,3 @@ export const reloj = (dir = 90) => `<span class="reloj" style="--dir:${dir}deg" 
   <path class="r-eje" d="${circulo(20, 20, 1.6)}"/>
 </svg></span>`;
 
-// Ondas de sonido (el botón de sonido las anima cuando está activo)
-export const ondas = () => `<svg class="ondas" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-  <path class="o-punto" d="${circulo(6, 12, 2.2)}"/>
-  <path class="o-1" d="M10 8.5a5 5 0 0 1 0 7"/>
-  <path class="o-2" d="M13.5 6a8.5 8.5 0 0 1 0 12"/>
-  <path class="o-3" d="M17 3.5a12 12 0 0 1 0 17"/>
-  <path class="o-corte" d="M4 20 20 4"/>
-</svg>`;

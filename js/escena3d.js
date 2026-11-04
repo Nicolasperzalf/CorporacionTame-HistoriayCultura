@@ -18,6 +18,8 @@ function pose(S, wide, aspect) {
     const o = {}; for (const k in H) o[k] = H[k] + (C[k] - H[k]) * p; return o;
   }
   if (S.page === "nosotros") return wide ? { xf: 0.52, yf: 0.02, z: 0, s: 1.15 } : { xf: 0, yf: 0.3, z: -10, s: 1.1 };
+  // En el celular, dentro de los capítulos el reloj se retira a la esquina (luna lejana) para no quedar detrás de los títulos
+  if (!wide) return { xf: 0.74, yf: 0.9, z: -80, s: 1.4 };
   if (S.page === "monumentos") return { ...BG, z: -40 };
   return BG;
 }
@@ -29,7 +31,9 @@ export async function iniciarEscena(canvas, S, alListo) {
   catch (e) { alListo(); return; }
 
   const small = () => innerWidth < 700 || S.coarse;
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); // más nitidez no se nota y cuesta fluidez
+  const ligero = small(); // celular: menos detalle en la geometría y sin capa de barniz (clearcoat), que es lo más costoso
+  const seg = n => ligero ? Math.round(n / 2) : n;
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, ligero ? 1.25 : 1.5)); // más nitidez no se nota y cuesta fluidez
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
@@ -45,23 +49,23 @@ export async function iniciarEscena(canvas, S, alListo) {
   panel(8, 1.2, 0xc5a059, 2.5, [0, -4, -5]); panel(3, 3, 0x7f93c9, 1.8, [-4, -1, -6]); panel(10, 0.4, 0xffffff, 3, [0, 6, -2]); panel(5, 4, 0xffe6bf, 2.2, [1.5, 1, 8]);
   scene.environment = pmrem.fromScene(env, 0.035).texture;
 
-  const gold = new THREE.MeshPhysicalMaterial({ name: "oro", color: 0xC5A059, metalness: 1, roughness: 0.26, clearcoat: 0.6, clearcoatRoughness: 0.2 });
+  const gold = new THREE.MeshPhysicalMaterial({ name: "oro", color: 0xC5A059, metalness: 1, roughness: 0.26, clearcoat: ligero ? 0 : 0.6, clearcoatRoughness: 0.2 });
   const bronze = new THREE.MeshPhysicalMaterial({ name: "bronce", color: 0x8B6B3D, metalness: 1, roughness: 0.4 });
   const tex = new THREE.TextureLoader().load(LOGO);
   tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const k = 0.9; tex.repeat.set(k, k); tex.offset.set((1 - k) / 2 + 0.001, (1 - k) / 2 - 0.004);
-  const face = new THREE.MeshPhysicalMaterial({ name: "logotipo", map: tex, emissiveMap: tex, emissive: 0xffffff, emissiveIntensity: 0.22, metalness: 0.35, roughness: 0.34, clearcoat: 1, clearcoatRoughness: 0.08 });
+  const face = new THREE.MeshPhysicalMaterial({ name: "logotipo", map: tex, emissiveMap: tex, emissive: 0xffffff, emissiveIntensity: 0.22, metalness: 0.35, roughness: 0.34, clearcoat: ligero ? 0 : 1, clearcoatRoughness: 0.08 });
 
-  const steel = new THREE.MeshPhysicalMaterial({ name: "marron", color: 0x5a3519, metalness: 0.55, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.15 });
+  const steel = new THREE.MeshPhysicalMaterial({ name: "marron", color: 0x5a3519, metalness: 0.55, roughness: 0.32, clearcoat: ligero ? 0 : 1, clearcoatRoughness: 0.15 });
   const emblem = new THREE.Group(); scene.add(emblem);
   const medal = new THREE.Group(); medal.scale.setScalar(0.8); emblem.add(medal);
   const add = (geo, mat, parent, p, r) => { const m = new THREE.Mesh(geo, mat); if (p) m.position.set(...p); if (r) m.rotation.set(...r); parent.add(m); return m; };
   // Reloj de bolsillo: caja, bisel, esfera con numerales romanos y logotipo al centro
   const R = 1.6, RC = 2.0, T = 0.34, ZD = T / 2 + 0.004;
-  add(new THREE.CylinderGeometry(RC, RC, T, 128), gold, medal, [0, 0, 0], [Math.PI / 2, 0, 0]);
-  add(new THREE.TorusGeometry(1.98, 0.08, 20, 160), gold, medal, [0, 0, T / 2]);
-  add(new THREE.TorusGeometry(1.98, 0.07, 16, 160), gold, medal, [0, 0, -T / 2]);
-  add(new THREE.TorusGeometry(1.4, 0.02, 10, 140), bronze, medal, [0, 0, -T / 2 - 0.01]);
+  add(new THREE.CylinderGeometry(RC, RC, T, seg(128)), gold, medal, [0, 0, 0], [Math.PI / 2, 0, 0]);
+  add(new THREE.TorusGeometry(1.98, 0.08, seg(20), seg(160)), gold, medal, [0, 0, T / 2]);
+  add(new THREE.TorusGeometry(1.98, 0.07, seg(16), seg(160)), gold, medal, [0, 0, -T / 2]);
+  add(new THREE.TorusGeometry(1.4, 0.02, seg(10), seg(140)), bronze, medal, [0, 0, -T / 2 - 0.01]);
   add(new THREE.CylinderGeometry(0.12, 0.14, 0.28, 32), gold, medal, [0, RC + 0.1, 0]);
   add(new THREE.CylinderGeometry(0.2, 0.2, 0.2, 36), bronze, medal, [0, RC + 0.3, 0]);
   add(new THREE.TorusGeometry(0.2, 0.035, 12, 48), gold, medal, [0, RC + 0.3, 0], [Math.PI / 2, 0, 0]);
@@ -83,9 +87,9 @@ export async function iniciarEscena(canvas, S, alListo) {
   };
   const ringTex = new THREE.CanvasTexture(cv); ringTex.colorSpace = THREE.SRGBColorSpace; ringTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
   dial(); (document.fonts?.load("600 40px 'Ibarra Real Nova'") || Promise.resolve()).then(dial, () => {});
-  const ringMat = new THREE.MeshPhysicalMaterial({ name: "esfera", map: ringTex, emissiveMap: ringTex, emissive: 0xffffff, emissiveIntensity: 0.18, roughness: 0.4, clearcoat: 1, clearcoatRoughness: 0.1 });
-  add(new THREE.RingGeometry(R - 0.02, 1.9, 128, 1), ringMat, medal, [0, 0, ZD]);
-  add(new THREE.CircleGeometry(R - 0.01, 128), face, medal, [0, 0, ZD + 0.002]);
+  const ringMat = new THREE.MeshPhysicalMaterial({ name: "esfera", map: ringTex, emissiveMap: ringTex, emissive: 0xffffff, emissiveIntensity: 0.18, roughness: 0.4, clearcoat: ligero ? 0 : 1, clearcoatRoughness: 0.1 });
+  add(new THREE.RingGeometry(R - 0.02, 1.9, seg(128), 1), ringMat, medal, [0, 0, ZD]);
+  add(new THREE.CircleGeometry(R - 0.01, seg(128)), face, medal, [0, 0, ZD + 0.002]);
   // Manecillas
   const mano = (len, w, tail, name, mat, z) => {
     const s = new THREE.Shape();
@@ -102,7 +106,7 @@ export async function iniciarEscena(canvas, S, alListo) {
   const rim = new THREE.PointLight(0xc5a059, 40, 14); rim.position.set(3, -1.5, -2.5); scene.add(rim);
 
   // Estrellas
-  const N = small() ? 700 : 1600, ZF = -160, ZN = 12;
+  const N = ligero ? 600 : 1600, ZF = -160, ZN = 12;
   const pos = new Float32Array(N * 6), col = new Float32Array(N * 6), st = new Float32Array(N * 3);
   const seed = (i, z) => { let x, y; do { x = (Math.random() - 0.5) * 80; y = (Math.random() - 0.5) * 50; } while (x * x + y * y < 4); st[i * 3] = x; st[i * 3 + 1] = y; st[i * 3 + 2] = z; };
   for (let i = 0; i < N; i++) {

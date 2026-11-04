@@ -4,7 +4,7 @@
    desplazamientos) y los mismos tiempos de js/movimiento.js.
    Índice: 1 Revelados · 2 Luz que sigue el cursor · 3 Relojes
            4 Túnel y puertas · 5 Íconos vivos · 6 Portal
-           7 Pantalla de carga · 8 Sonido · 9 Movimiento reducido
+           7 Pantalla de carga · 8 Movimiento reducido
    ========================================================== */
 
 /* 1 · REVELADOS ---------------------------------------------- */
@@ -13,9 +13,9 @@
 @keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
 @keyframes girar { to { transform: rotate(360deg); } }
 /* Aparición al entrar en pantalla (encadenada desde js/movimiento.js con --d0) */
-[data-rv] { transition: opacity 1s ease var(--d0, 0ms), translate 1.3s var(--sale) var(--d0, 0ms), filter 1s ease var(--d0, 0ms); }
+[data-rv] { transition: opacity 1s ease var(--d0, 0ms), translate 1.3s var(--sale) var(--d0, 0ms); }
 [data-rv].oculto { opacity: 0; translate: 0 48px; }
-@media (pointer: coarse) { [data-rv].oculto { filter: none; translate: 0 32px; } }
+@media (pointer: coarse) { [data-rv].oculto { translate: 0 32px; } }
 /* Máscara: cada palabra sube desde detrás de su propia ventana */
 .mk { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .08em .14em 0; margin: 0 -.08em -.14em 0; }
 .mk-i { display: inline-block; transform: translateY(112%) rotate(5deg); transform-origin: 0 100%; transition: transform 1.15s var(--sale); transition-delay: calc(var(--d0, 0ms) + var(--i, 0) * 55ms); }
@@ -37,8 +37,9 @@
 .luz::after { inset: -12px; z-index: -1; filter: blur(16px); opacity: calc(var(--luz) * .55); }
 /* Pantallas táctiles: la luz recorre el borde sola, como un segundero (cada puerta a su hora) */
 @media (hover: none) {
-  .luz:is(.btn-oro, .siguiente, .puerta) { --luz: .6; animation: segundero 7s linear infinite; }
-  .luz.puerta { --luz: .4; animation-duration: 12s; animation-delay: calc(var(--h, 0) * -2s); }
+  .luz:is(.btn-oro, .siguiente) { --luz: .6; animation: segundero 7s linear infinite; }
+  /* En las seis puertas la luz queda quieta, cada una a su hora (moverla en todas a la vez pesa en el celular) */
+  .luz.puerta { --luz: .4; --ang: calc(var(--h, 0) * 60deg + 30deg); }
   .luz::after { display: none; }
 }
 @keyframes segundero { from { --ang: 0deg; } to { --ang: 360deg; } }
@@ -142,14 +143,6 @@
 .pre-img { width: 72%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 1px rgba(197, 160, 89, .35), 0 20px 50px -20px rgba(0, 0, 0, .9); }
 .pre-img img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.14); }
 .pre-anio { margin: clamp(14px, 2.4vh, 24px) 0 0; font-family: var(--f-numeral); font-weight: 600; font-size: clamp(46px, 8vh, 78px); line-height: 1; letter-spacing: .04em; font-variant-numeric: lining-nums tabular-nums; background: linear-gradient(180deg, #F6E7C4, var(--oro) 70%, var(--bronce)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.pre-puerta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 18px; margin-top: 18px; animation: aparecer .8s ease; }
-.pre-puerta .btn-oro { display: inline-grid; gap: 6px; align-content: center; }
-.pre-puerta .btn-oro .btn-txt { max-width: 10ch; position: relative; z-index: 2; }
-.pre-puerta .btn-oro .reloj-son { position: relative; z-index: 2; width: 22px; height: 22px; }
-.pre-aviso { flex: 0 0 100%; margin: 0 0 6px; text-align: center; font-size: 14px; line-height: 1.5; color: var(--texto-2); text-wrap: balance; }
-.reloj-son { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: var(--oro); grid-area: auto !important; }
-.reloj-son svg { width: 20px; height: 20px; }
-.pre-puerta .btn-oro > .btn-txt { grid-area: auto; }
 .pre-friso-caja { position: relative; height: clamp(140px, 27vh, 290px); overflow: hidden; -webkit-mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); transition: opacity .8s ease, translate 1.2s var(--sale); }
 .pre-friso { display: block; height: 100%; width: auto; max-width: none; margin: 0 auto; overflow: visible; will-change: transform; }
 .pre-friso path { fill: none; stroke: var(--oro); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
@@ -167,8 +160,8 @@
 .pre-friso-caja { pointer-events: none; }
 
 /* Aplicación: entra con zoom después de la pantalla de carga */
-.app { opacity: 0; transform: scale(1.18); transform-origin: 50% 40vh; transition: opacity 1s ease .15s, transform 1.5s var(--curva), filter 1s ease .1s; }
-body.intro .app { opacity: 1; transform: none; filter: none; }
+.app { opacity: 0; transform: scale(1.18); transform-origin: 50% 40vh; transition: opacity 1s ease .15s, transform 1.5s var(--curva); }
+body.intro .app { opacity: 1; transform: none; }
 .hero .pal > span { display: inline-block; transform: translateY(110%) rotate(5deg); transform-origin: 0 100%; transition: transform 1.4s var(--curva); }
 body.intro .hero .pal > span { transform: none; }
 .aparece { opacity: 0; transform: translateY(24px); transition: opacity 1s ease var(--d, 0s), transform 1.2s var(--curva) var(--d, 0s); }
@@ -176,19 +169,7 @@ body.intro .aparece { opacity: 1; transform: none; }
 .hero-scroll span { animation: caer 2.2s var(--mueve) infinite; }
 @keyframes caer { from { transform: translateY(-100%); } to { transform: translateY(260%); } }
 
-/* 8 · SONIDO -------------------------------------------------- */
-.ondas .o-1, .ondas .o-2, .ondas .o-3 { transition: opacity .4s; }
-.ondas .o-corte { opacity: 0; transition: opacity .3s; }
-[aria-pressed="false"] .ondas :is(.o-2, .o-3) { opacity: .25; }
-[aria-pressed="false"] .ondas .o-corte { opacity: 1; }
-[aria-pressed="true"] .ondas :is(.o-1, .o-2, .o-3) { animation: onda 1.8s ease-in-out infinite; }
-[aria-pressed="true"] .ondas .o-2 { animation-delay: .2s; } [aria-pressed="true"] .ondas .o-3 { animation-delay: .4s; }
-@keyframes onda { 0%, 100% { opacity: .35; } 40% { opacity: 1; } }
-.reloj-son .ondas .o-corte { display: none; }
-.reloj-son .ondas :is(.o-1, .o-2, .o-3) { animation: onda 1.8s ease-in-out infinite; }
-.reloj-son .ondas .o-2 { animation-delay: .2s; } .reloj-son .ondas .o-3 { animation-delay: .4s; }
-
-/* 9 · MOVIMIENTO REDUCIDO ---------------------------------------- */
+/* 8 · MOVIMIENTO REDUCIDO ---------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation: none !important; }
   .mk-i, .hero .pal > span { transform: none !important; }

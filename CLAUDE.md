@@ -13,11 +13,12 @@ Las direcciones viejas (`*.github.io`, `*.workers.dev`) redirigen al dominio (sc
 - Imágenes en `assets/` sin subcarpetas y con nombres sin espacios ni tildes.
 
 ## Estructura
-- `index.html` — estructura pública. `css/styles.css` — estilos (variables en `:root`). `css/movimiento.css` — todo el movimiento (revelados, luz, túnel, portal, carga, sonido, `prefers-reduced-motion`).
+- `index.html` — estructura pública. `css/styles.css` — estilos (variables en `:root`). `css/movimiento.css` — todo el movimiento (revelados, luz, túnel, portal, carga, `prefers-reduced-motion`).
 - `js/app.js` — capítulos (`PAGES`), navegación `#/id`, libros 3D (Cap. V), formulario (Cap. VI) y arranque.
 - `js/movimiento.js` — motor de movimiento compartido: `TIEMPOS`/`CURVA`, `revelar` (máscaras y trazos encadenados), luz de borde que sigue el cursor con chispas (`.luz`), `animarPuertas` (túnel que acelera), `atravesar` (portal que crece desde lo pulsado y une la salida de un capítulo con la entrada del siguiente).
-- `js/precarga.js` — pantalla de carga SIN textos: aro-reloj con el logo, años 1629→2029 y friso de línea (caney, canoa, conuco, morichal) que se dibuja según el avance real; al final, aviso de que el sitio tiene sonido y puerta «Entrar con sonido / en silencio».
-- `js/sonido.js` — sonido sintetizado (Web Audio, sin archivos): fondo de espacio profundo (acorde grave que respira, polvo cósmico, destellos con eco) y cuatro llanero sintetizado (afinación real La-Re-Fa#-Si): SOLO en las seis puertas del inicio (rasgueo al acercarse); al cruzar, llegar y en los demás capítulos no hay instrumentos, solo el espacio. Sin arpa, aves, tic-tac ni grillos. Solo con permiso; se recuerda en `localStorage` (`tame-sonido`).
+- `js/precarga.js` — pantalla de carga SIN textos: aro-reloj con el logo, años 1629→2029 y friso de línea (caney, canoa, conuco, morichal) que se dibuja según el avance real; al terminar entra solo (sin botones).
+- SIN SONIDO (pedido de Nicolas, 2026-11-04): se quitó `js/sonido.js`, el aviso de la carga y el botón de sonido. No volver a poner audio.
+- Rendimiento (2026-11-04): sin `backdrop-filter` ni desenfoques grandes; en celular el 3D usa menos detalle, sin clearcoat y pixelRatio ≤ 1,25; las imágenes de `assets/` van a máx. 1600 px (libros 1000 px de ancho).
 - `js/iconos.js` — íconos de línea por capítulo (se dibujan solos) y los relojes de los botones.
 - Cloudflare: `wrangler.jsonc` (vistas previas de ramas), `_headers` (seguridad y caché), `.assetsignore` (lo que no se publica).
 - `js/escena3d.js` — fondo three.js (three@0.184.0 por import dinámico): estrellas warp + reloj de bolsillo dorado; el logotipo es la esfera; las manecillas marcan la hora del capítulo (Inicio = XII, I…VI).
@@ -38,6 +39,7 @@ Las direcciones viejas (`*.github.io`, `*.workers.dev`) redirigen al dominio (sc
 - Movimiento: capítulos = «puertas del tiempo» (arco de misión con túnel); botones principales (`.btn-oro`, `.btn-vidrio`) = siluetas de reloj de bolsillo (círculo con asa y corona, SIN marcas ni aguja), con luz de borde que sigue el cursor; «Siguiente destino» = placa de esquinas cortadas con una esfera cuya aguja avanza a la hora del próximo capítulo (sin texto «Cruzar la puerta»).
 - Monumentos: la foto se ve completa (contain) y aparece abriéndose desde el centro; el texto va algo desvanecido con sombra para leerse. Sin franja de fechas, sin cursor personalizado.
 - Puertas: la I (Quiénes somos) lleva el logotipo recortado sin el borde blanco y con más contraste; la VI (Aporte ciudadano) lleva el ícono de líneas que antes tenía la I.
+- Celular: en los capítulos el reloj 3D se retira a la esquina superior; en Monumentos la foto va arriba y el texto debajo; en Publicaciones los botones de vista van debajo del libro.
 - Friso de carga: basado en Rivero y Gumilla y en el informe `investigacion/reports/Pueblos indígenas de Tame siglo XVII.md` de la carpeta del proyecto. Sin penachos, flautas sagradas ni imágenes de los U'wa; los pueblos siguen vivos (makaguán, hitnü, sikuani).
 - Tono: serio, territorial, respetuoso con la memoria local. Sin emojis.
 - 6 capítulos: I Quiénes somos · II Tribuna de la Memoria · III Salón de monumentos · IV Línea temporal · V Publicaciones · VI Aporte ciudadano.
