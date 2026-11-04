@@ -495,3 +495,37 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 98; pointer-event
 .pie-legal { margin: 28px 0 0; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, .08); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: #8a867f; }
 .pie-legal a { color: #8a867f; text-decoration: none; }
 .pie-legal a:hover { color: var(--oro); }
+
+/* 7 · SEÑALES DE CONTENIDO (2026-11-04) --------------------------
+   Para que se sepa qué hay detrás de cada puerta antes de cruzarla:
+   aviso de la última columna, etiqueta de cada puerta, cifras del archivo,
+   reseña en el menú y el recorrido completo en el pie. */
+.hero-aviso { display: inline-flex; align-items: center; gap: 12px; max-width: min(100%, 620px); margin: 0 0 clamp(18px, 3vh, 28px); padding: 8px 16px 8px 8px; border: 0; border-radius: 999px; background: rgba(12, 15, 22, .82); box-shadow: inset 0 0 0 1px rgba(197, 160, 89, .32); color: var(--perla); text-align: left; transition: box-shadow .4s, color .3s; }
+.hero-aviso small { flex: none; padding: 5px 10px; border-radius: 999px; background: rgba(197, 160, 89, .14); color: var(--oro-claro); font-size: 12px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
+.hero-aviso b { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-family: var(--f-titulo); font-weight: 500; font-size: 17px; }
+.hero-aviso-f { flex: none; color: var(--oro); transition: translate .4s var(--sale); }
+@media (hover: hover) {
+  .hero-aviso:hover { box-shadow: inset 0 0 0 1px rgba(226, 196, 138, .7); color: var(--oro-claro); }
+  .hero-aviso:hover .hero-aviso-f { translate: 4px 0; }
+}
+@media (max-width: 559px) { .hero-aviso small { display: none; } .hero-aviso { padding-left: 16px; } .hero-aviso b { font-size: 16px; } }
+
+.puerta-meta { margin-top: 2px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--gris); text-wrap: balance; }
+.puerta:hover .puerta-meta, .puerta:focus-visible .puerta-meta { color: var(--oro-claro); }
+
+.cifras { margin: clamp(40px, 6vw, 80px) 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 320px)); border-top: 1px solid rgba(197, 160, 89, .22); }
+.cifra { display: flex; flex-direction: column-reverse; gap: 6px; padding: 22px 20px 4px 0; }
+.cifra + .cifra { padding-left: 20px; border-left: 1px solid rgba(255, 255, 255, .08); }
+.cifra dd { margin: 0; font-family: var(--f-numeral); font-weight: 500; font-size: clamp(40px, 4.4vw, 68px); line-height: 1; color: var(--perla); font-variant-numeric: lining-nums tabular-nums; }
+.cifra:last-child dd { color: var(--oro); }
+.cifra dt { font-size: 13px; letter-spacing: .08em; color: var(--texto-2); }
+@media (max-width: 639px) { .cifras { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cifra + .cifra { padding-left: 14px; } }
+
+#menu nav .menu-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+#menu nav .menu-txt small { font-family: var(--f-texto); font-size: 14px; line-height: 1.4; color: var(--gris); }
+
+.pie-recorrido { margin-top: clamp(40px, 5vw, 64px); }
+.pie-recorrido ol { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 28px; }
+.pie-recorrido button { display: inline-flex; align-items: baseline; gap: 10px; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--texto-2); font-size: 15px; transition: color .3s; }
+.pie-recorrido button b { font-family: var(--f-numeral); font-weight: 500; font-size: 15px; color: var(--oro); }
+.pie-recorrido button:hover { color: var(--oro-claro); }
