@@ -9,9 +9,8 @@
 //    solo tronco, la vasija de barro, el caney (casa comunal), el
 //    chinchorro, el arco de macana y el morichal. El avance del dibujo
 //    ES la barra de progreso; una plumilla dorada marca dónde va.
-//  - Para que la espera no frustre: mensajes de etapa, datos de la
-//    época (citas de la crónica de Gumilla) y, si la conexión es lenta,
-//    un botón para entrar sin esperar el fondo 3D.
+//  - Al terminar se entra solo (el sitio no tiene sonido). Si la
+//    conexión es lenta, se entra sin esperar el fondo 3D.
 //  Fuentes y criterios: /mnt/project-files/investigacion/ (informe).
 // ==========================================================
 
@@ -106,13 +105,12 @@ const lim = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
  * @param {object} o
  * @param {() => {contenido: boolean, escena: boolean}} o.estado  qué ya cargó
  * @param {boolean} o.reduce      movimiento reducido: sin animación
- * @param {boolean|null} o.preferencia  sonido elegido antes (null = primera visita)
- * @param {(conSonido: boolean) => void} o.alEntrar  se llama al entrar (con la elección de sonido)
+ * @param {() => void} o.alEntrar  se llama al entrar
  */
-export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
+export function iniciarPrecarga({ estado, reduce, alEntrar }) {
   const el = document.getElementById("precarga");
   const $ = s => el.querySelector(s);
-  const anio = $("#pre-anio"), msg = $("#pre-msg"), aro = $("#pre-aro"), puerta = $("#pre-puerta");
+  const anio = $("#pre-anio"), msg = $("#pre-msg"), aro = $("#pre-aro");
 
   // 1 · Construir el friso y las 12 marcas del aro
   const svg = $("#pre-friso"), caja = $(".pre-friso-caja");
@@ -125,7 +123,9 @@ export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
   let paneo = 0, mostrado = 0, t0 = performance.now(), fin = false, listoEn = 0;
   // Mientras carga, lo de atrás no recibe foco ni clics
   const app = document.getElementById("app"); if (app) app.inert = true;
-  const minimo = preferencia == null ? 3200 : 1800; // la primera visita se toma su tiempo para el dibujo
+  // la primera visita se toma su tiempo para el dibujo; las siguientes van más rápido
+  let visto = false; try { visto = !!localStorage.getItem("tame-visita"); localStorage.setItem("tame-visita", "1"); localStorage.removeItem("tame-sonido"); } catch (e) {}
+  const minimo = visto ? 1600 : 2800;
   // La pantalla solo muestra el dibujo; el texto queda para lectores de pantalla
   const pintar = p => {
     anio.textContent = String(1629 + Math.round(p * 400));
@@ -151,22 +151,17 @@ export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
     const texto = p >= 1 ? "Todo listo para el viaje" : "Cargando";
     if (msg.textContent !== texto) msg.textContent = texto;
   };
-  const mostrarPuerta = () => {
-    puerta.hidden = false; el.classList.add("lista");
-    puerta.querySelector("[data-entrar='si']").focus({ preventScroll: true });
-  };
-  const entrar = conSonido => {
+  const entrar = () => {
     if (fin) return; fin = true;
     el.classList.add("sale");
     if (app) app.inert = false;
-    alEntrar(conSonido);
+    alEntrar();
     setTimeout(() => el.remove(), 1700);
   };
-  puerta.addEventListener("click", e => { const b = e.target.closest("[data-entrar]"); if (b) entrar(b.dataset.entrar === "si"); });
 
   if (reduce) { // sin animación: dibujo completo y entrada directa
     pintar(1);
-    const v = setInterval(() => { if (estado().contenido) { clearInterval(v); mostrarPuerta(); } }, 100);
+    const v = setInterval(() => { if (estado().contenido) { clearInterval(v); entrar(); } }, 100);
     return;
   }
 
@@ -182,14 +177,11 @@ export function iniciarPrecarga({ estado, reduce, preferencia, alEntrar }) {
     mostrado += (meta - mostrado) * 0.09;
     if (meta >= 1 && 1 - mostrado < 0.002) mostrado = 1;
     pintar(mostrado);
-    // Conexión lenta: si el contenido ya está pero el fondo 3D no, se ofrece entrar ya (el fondo se suma después)
-    if (t > 6500 && e.contenido && !e.escena && puerta.hidden) mostrarPuerta();
+    // Conexión lenta: si el contenido ya está pero el fondo 3D no, se entra ya (el fondo se suma después)
+    if (t > 6500 && e.contenido && !e.escena) { entrar(); return; }
     if (mostrado >= 1) {
       if (!listoEn) listoEn = ahora;
-      if (ahora - listoEn > 450) { // pausa breve para ver el dibujo completo
-        // siempre se muestra la puerta: avisa que hay sonido y deja elegir (en iPhone el sonido solo arranca con un toque)
-        if (puerta.hidden) mostrarPuerta();
-      }
+      if (ahora - listoEn > 450) { entrar(); return; } // pausa breve para ver el dibujo completo
     }
     requestAnimationFrame(bucle);
   };

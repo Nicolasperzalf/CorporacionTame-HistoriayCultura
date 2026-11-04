@@ -5,14 +5,13 @@
 //  El CONTENIDO no se escribe aquí: viene de la base de datos
 //  (js/datos.js) o del respaldo js/contenido-local.js.
 //  El MOVIMIENTO (revelados, luces, puertas, portal) vive en
-//  js/movimiento.js; el SONIDO en js/sonido.js; los ÍCONOS en
-//  js/iconos.js y la PANTALLA DE CARGA en js/precarga.js.
+//  js/movimiento.js; los ÍCONOS en js/iconos.js y la PANTALLA
+//  DE CARGA en js/precarga.js. El sitio no tiene sonido.
 // ==========================================================
 import { cargarContenido, enviarAporte, conectado } from "./datos.js";
 import { iniciarEscena } from "./escena3d.js";
 import { MOV, TIEMPOS, mascaraViva, revelar, redibujar, iniciarLuces, observarLuces, animarPuertas, atravesar, enmascarar } from "./movimiento.js";
-import { sonido } from "./sonido.js";
-import { ICONOS, reloj, ondas } from "./iconos.js";
+import { ICONOS, reloj } from "./iconos.js";
 import { iniciarPrecarga } from "./precarga.js";
 
 /* 1 · ESTADO Y UTILIDADES ------------------------------------ */
@@ -99,10 +98,9 @@ V.inicio = () => {
   </section>`;
 };
 M.inicio = () => {
-  // Al acercarse a una puerta: su túnel acelera, las estrellas del fondo también, suena su cuerda y su ícono se redibuja
+  // Al acercarse a una puerta: su túnel acelera, las estrellas del fondo también y su ícono se redibuja
   alSalir(animarPuertas($("#vista"), p => {
-    const n = +p.dataset.hora;
-    S.empuje = 1; sonido.nota(n); redibujar($(".puerta-ico svg", p));
+    S.empuje = 1; redibujar($(".puerta-ico svg", p));
     p.addEventListener("pointerleave", () => { S.empuje = 0; }, { once: true });
     p.addEventListener("blur", () => { S.empuje = 0; }, { once: true });
   }));
@@ -481,7 +479,7 @@ function marcarNav() {
   document.body.classList.toggle("leyendo", S.page !== "inicio");
 }
 // Viajar a un capítulo: el elemento tocado (puerta, reloj, botón) se abre como portal (js/movimiento.js),
-// las estrellas del fondo aceleran, y se oye solo el espacio de fondo.
+// y las estrellas del fondo aceleran.
 let viajando = false;
 function ir(id, origen) {
   if (!PAGES.some(p => p.id === id) || viajando) return;
@@ -494,11 +492,10 @@ function ir(id, origen) {
   const cambiar = () => { scrollTo({ top: 0, behavior: "instant" }); if (location.hash === hashIni || location.hash === "#/" + id) try { history.replaceState(null, "", "#/" + id); } catch (e) {} S.page = id; render(); };
   viajando = true; S.empuje = 0;
   S.boostT = performance.now() / 1000 + (TIEMPOS.abre + TIEMPOS.mantiene + TIEMPOS.cruza) / 1000;
-  sonido.viaje((TIEMPOS.abre + TIEMPOS.mantiene) / 1000, n);
   atravesar({
     origen: desdeMenu ? null : origen, cambiar,
     antes: inicio ? "Regreso al" : "Capítulo", numeral: inicio ? "XII" : p.n, titulo: inicio ? "Inicio" : p.label,
-    icono: ICONOS[id]?.() || "", alCruzar: () => sonido.llegada(n)
+    icono: ICONOS[id]?.() || ""
   }).finally(() => {
     viajando = false;
     // si la dirección cambió durante el viaje (atrás/adelante), seguir hasta allá
@@ -526,8 +523,6 @@ function efectos() {
     S.scrollVel = scrollY - ultimo; ultimo = scrollY;
     if (S.page === "inicio") document.body.classList.toggle("leyendo", scrollY > innerHeight * .5);
   }, { passive: true });
-  // Un tic de madera al presionar cualquier botón (solo si el sonido está activo)
-  addEventListener("pointerdown", e => { if (e.target.closest?.("button, a")) sonido.toque(); }, { passive: true });
   iniciarLuces();
 }
 
@@ -540,13 +535,6 @@ function construirNav() {
   $("#sig-dial").dataset.forma = "circulo";
   enmascarar($("#portal-t"));
 }
-// Botón de sonido (barra lateral y barra del celular): las ondas se mueven cuando está activo
-function pintarSonido() {
-  $$("[data-sonido]").forEach(b => {
-    b.setAttribute("aria-pressed", sonido.activo);
-    b.title = sonido.activo ? "Sonido activado" : "Sonido apagado";
-  });
-}
 function pie() {
   $("#red-wa").href = enlaceWa(A.whatsapp, "Hola, quisiera información sobre la Corporación Tame, Historia y Cultura."); $("#red-wa-t").textContent = verNumero(A.whatsapp);
   $("#red-mail").href = "mailto:" + A.correo; $("#red-mail").setAttribute("aria-label", "Escribir a " + A.correo); $("#red-mail-t").textContent = A.correo;
@@ -554,32 +542,25 @@ function pie() {
 }
 function eventos() {
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-ir],[data-menu],[data-scroll],[data-sonido]"); if (!t) return;
+    const t = e.target.closest("[data-ir],[data-menu],[data-scroll]"); if (!t) return;
     if (t.dataset.ir) ir(t.dataset.ir, t.id === "siguiente" ? $("#sig-dial") : t);
     else if (t.dataset.menu) t.dataset.menu === "abrir" ? abrirMenu() : cerrarMenu();
     else if (t.dataset.scroll) { const el = document.getElementById(t.dataset.scroll); if (el) scrollTo({ top: el.getBoundingClientRect().top + scrollY - (innerWidth < 900 ? 60 : 0), behavior: "smooth" }); }
-    else if (t.hasAttribute("data-sonido")) sonido.activar(!sonido.activo).then(pintarSonido);
   });
   addEventListener("keydown", e => { if (e.key === "Escape") cerrarMenu(); });
   addEventListener("hashchange", () => { const h = (location.hash.match(/^#\/(\w+)/) || [])[1]; if (h && h !== S.page) ir(h); });
 }
 
 let escenaLista = false, contenidoListo = false;
-$$("[data-sonido], .reloj-son").forEach(b => { b.innerHTML = ondas(); });
-$$('[data-entrar="si"]').forEach(b => b.insertAdjacentHTML("beforeend", reloj(180)));
 iniciarPrecarga({
   estado: () => ({ contenido: contenidoListo, escena: escenaLista }),
   reduce: S.reduce,
-  preferencia: sonido.preferencia,
-  alEntrar: conSonido => {
+  alEntrar: () => {
     S.introT0 = performance.now() / 1000 - (S.reduce ? 10 : 0);
     document.body.classList.add("intro");
-    // La entrada con sonido: arranca el fondo del espacio
-    if (conSonido) sonido.activar(true).then(() => { pintarSonido(); sonido.viaje(1.4); setTimeout(() => sonido.llegada(0), 1300); });
-    pintarSonido();
   }
 });
-efectos(); eventos(); construirNav(); pintarSonido();
+efectos(); eventos(); construirNav();
 iniciarEscena($("#espacio"), S, () => { escenaLista = true; });
 cargarContenido().then(c => {
   C = c; A = c.ajustes;
